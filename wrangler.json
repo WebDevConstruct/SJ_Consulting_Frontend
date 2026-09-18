@@ -1,0 +1,5 @@
+{
+    "name" : "sj_consulting_frontend",
+    "compatibility_date" : "2026-09-18",
+    "main" : ".open-next/worker.js"
+}
