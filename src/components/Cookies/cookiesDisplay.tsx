@@ -20,10 +20,7 @@ return (
          animate-floaty [scrollbar-width:none]
          [&::-webkit-scrollbar] `}>
             <div className="flex justify-end w-full items-center">
-                <img onClick={()=> {
-                  setShowCookie(false);
-                   }}
-                 src={XCircle} alt="" className="w-5 h-5 py-2"/>
+                <XCircle className="w-5 h-5 py-2" onClick={()=> {
             </div>
          <h1 className="text-[50px] font-[700] text-center ">
             Cookies

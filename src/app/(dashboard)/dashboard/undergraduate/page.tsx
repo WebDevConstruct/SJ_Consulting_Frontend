@@ -7,7 +7,7 @@ import { useSession } from "@/lib/auth/use-session";
 
 export default function UndergraduateDashboardPage() {
   const { user } = useSession();
-  const year = user?.undergraduate?.year ?? 1;
+  //const year = user?.undergraduate?.year ?? 1;
 
   return (
     <div className="px-6 py-10 md:px-12 md:py-14">
