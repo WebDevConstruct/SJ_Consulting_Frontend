@@ -8,19 +8,19 @@ import { useGlobalContext } from "../../Context";
 import {useEffect} from "react";
 
 export default function Home() {
-  console.log("Check COokies", localStorage.getItem("cookies"))
+
 
 
    const {showCookie, setShowCookie} = useGlobalContext()
      const cookieStore   = (): {cookieSet : ()=> void, getCookie : boolean }=> {
       // SETTING THE COOKIE IN LOCAL STORAGE
       const cookieSet = () =>{
-    localStorage.setItem("cookies", "true");
+    window.localStorage.setItem("cookies", "true");
     setShowCookie(false);
       } 
       ///\\\========\\==========//\\
       const getCookie = localStorage.getItem("cookies") === "true";
-      console.log(getCookie);
+    //  console.log(getCookie);
       //  if(getCookie){
       //    setCookieState(false);
       //  }
@@ -30,7 +30,7 @@ export default function Home() {
    const { getCookie} = cookieStore()
    useEffect(()=> {
       const runCookie = ()=> {
-       if(getCookie ){
+       if(getCookie){
            setShowCookie(false)
        } else{
          setShowCookie(true)
@@ -39,9 +39,8 @@ export default function Home() {
       runCookie()
    }, [])
 
-console.log(showCookie);
-//console.log(localStorage.getItem("cookies"))
-//const [cookieState, setCookieState] = React.useState<boolean>(false);
+
+
  
 
    

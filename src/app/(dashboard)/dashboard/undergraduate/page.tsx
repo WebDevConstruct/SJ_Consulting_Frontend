@@ -21,7 +21,7 @@ export default function UndergraduateDashboardPage() {
           Welcome back, {user?.name?.split(" ")[0] ?? "there"}.
         </h1>
         <p className="mt-1.5 text-[14px] text-current/60">
-          Year {year} &middot; UNILAG undergraduate
+          Year &middot; UNILAG undergraduate
         </p>
       </motion.div>
 
