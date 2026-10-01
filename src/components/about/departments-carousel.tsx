@@ -44,7 +44,8 @@ export function DepartmentsCarousel() {
               onClick={() => scrollBy(-1)}
               disabled={atStart}
               aria-label="Scroll departments left"
-              className="focus-gold flex h-10 w-10 items-center justify-center rounded-full border border-current/20 transition-colors hover:border-gold-400 hover:text-gold-500 disabled:opacity-30 disabled:hover:border-current/20 disabled:hover:text-current"
+              className="focus-gold flex h-10 w-10 items-center justify-center rounded-full border border-current/20 
+              transition-colors hover:border-gold-400 hover:text-gold-500 disabled:opacity-30 disabled:hover:border-current/20 disabled:hover:text-current"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>

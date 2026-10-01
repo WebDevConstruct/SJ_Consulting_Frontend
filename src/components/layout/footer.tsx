@@ -1,6 +1,8 @@
+"use client"
+
 import Link from "next/link";
 import { AtSign, Mail, Phone, Send } from "lucide-react";
-
+import {usePathname} from "next/navigation";
 const COLUMNS = [
   {
     title: "Platform",
@@ -32,8 +34,9 @@ const COLUMNS = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
   return (
-    <footer className="border-t border-ink-line bg-ink text-ivory">
+    <footer className={`${pathname?.includes("dashboard") ? "hidden" : "block"} border-t border-ink-line bg-ink text-ivory`}>
       <div className="container-content py-16">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>

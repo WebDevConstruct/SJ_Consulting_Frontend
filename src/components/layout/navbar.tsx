@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import {usePathname} from "next/navigation";
 import Image from "next/image";
 
 const NAV_LINKS = [
@@ -14,6 +15,7 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -26,7 +28,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-colors duration-300 ${
+      className={`sticky ${pathname?.includes("dashboard") ? "hidden" : "block"} top-0 z-50 w-full transition-colors duration-300 ${
         scrolled
           ? "bg-paper/90 backdrop-blur-md border-b border-paper-line dark:bg-ink/90 dark:border-ink-line"
           : "bg-transparent"

@@ -13,14 +13,17 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
       <div className="flex flex-col gap-2">
         <label
           htmlFor={inputId}
-          className="text-[13.5px] font-medium text-current/80"
+          className="text-base font-medium text-current/80"
         >
           {label}
         </label>
         <input
           ref={ref}
           id={inputId}
-          className={`focus-gold rounded-sm border border-paper-line bg-paper px-4 py-3 text-[14.5px] text-current placeholder:text-current/35 dark:border-ink-line dark:bg-ink-surface ${className}`}
+          className={`focus-gold rounded-sm outline-none 
+             focus:outline-none border-none border-paper-line bg-paper 
+             px-4 py-3 text-[14.5px] text-current placeholder:text-current/35
+              dark:border-ink-line dark:bg-ink-surface ${className}`}
           {...props}
         />
         {hint ? (

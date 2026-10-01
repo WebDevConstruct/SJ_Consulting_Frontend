@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-
+import {ContextProvider} from "../../Context";
 export const metadata: Metadata = {
   title: "SJ Consult — JAMB & UNILAG Guidance, Verified",
   description:
@@ -34,11 +34,14 @@ export default function RootLayout({
        
       </head>
       <body>
+        <ContextProvider>
         <ThemeProvider>
+          
           <Navbar />
           <main className="font-ui-sans-serif">{children}</main>
           <Footer />
         </ThemeProvider>
+        </ContextProvider>
          <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </body>
     </html>

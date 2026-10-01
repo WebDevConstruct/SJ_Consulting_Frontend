@@ -20,8 +20,9 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <section className="bg-paper-soft dark:bg-ink-soft">
-      <div className="container-content flex justify-center py-20 md:py-28">
-        <div className="w-full max-w-md rounded-sm border border-paper-line bg-paper p-8 dark:border-ink-line dark:bg-ink-surface sm:p-10">
+      <div className=" container-content flex justify-center py-20 md:py-28">
+        <div className="w-full max-w-md rounded-sm border border-paper-line
+         bg-paper p-8 dark:border-ink-line dark:bg-ink-surface sm:p-10">
           <div className="h-[2px] w-10 bg-gold-metal" />
           <h1 className="mt-5 font-display text-[28px] leading-tight sm:text-[32px]">
             {title}
