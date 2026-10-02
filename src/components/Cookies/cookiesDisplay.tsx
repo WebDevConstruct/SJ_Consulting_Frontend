@@ -41,12 +41,12 @@ return (
 
 
     <Button text="Accept All Cookies" 
-    className={"w-1/2 lg:w-[300px] py-4!"} 
+    className={"w-1/2 lg:w-[300px] "} 
     type="button" onClick={()=> cookieSet()}/>
 
     {/* OPTIONAL COOKIES */}
 
- <Button text="Decline non-essential cookies" className={"w-1/2 lg:w-[300px] py-4!"}
+ <Button text="Decline non-essential cookies" className={"w-1/2 lg:w-[300px] "}
       type="button" onClick={()=> cookieSet()}/>
      
 

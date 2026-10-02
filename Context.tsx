@@ -18,14 +18,23 @@ type contextTypes = {
     accountCompletionState : boolean,
     setAccountCompletionState : React.Dispatch<React.SetStateAction<boolean>>
     accountCompleteSuccess : boolean,
-    setAccountCompleteSuccess : React.Dispatch<React.SetStateAction<boolean>>
+    setAccountCompleteSuccess : React.Dispatch<React.SetStateAction<boolean>>,
+    facultyValue : string,
+    setFacultyValue : React.Dispatch<React.SetStateAction<string>>,
+    collegeValue : string,
+    setCollegeValue : React.Dispatch<React.SetStateAction<string>>,
+    departmentValue : string,
+    setDepartmentValue : React.Dispatch<React.SetStateAction<string>>,
 }
 const contextTree : React.Context<contextTypes> = createContext({} as contextTypes);
 export const useGlobalContext =()=> useContext(contextTree);
 
 export const ContextProvider = ({children}: {children ?: React.ReactNode})=> {
    const [showCookie, setShowCookie] = useState<boolean>(false);
-      const [accountCompletionState,  setAccountCompletionState] = useState<boolean>(false)
+      const [accountCompletionState,  setAccountCompletionState] = useState<boolean>(false);
+      const [facultyValue, setFacultyValue] = useState<string>("")
+       const [collegeValue, setCollegeValue] = useState<string>("");
+        const [departmentValue, setDepartmentValue] = useState<string>("");
     const [signUpState, setSignUpState] = useState({
         codeSent : false,
         otpSent : false,
@@ -42,6 +51,9 @@ export const ContextProvider = ({children}: {children ?: React.ReactNode})=> {
         accountCompletionState,
         setAccountCompletionState,
         showCookie, setShowCookie,
+        facultyValue, setFacultyValue,
+        collegeValue, setCollegeValue,
+        departmentValue, setDepartmentValue,
         accountCompleteSuccess, setAccountCompleteSuccess
     }
     return (

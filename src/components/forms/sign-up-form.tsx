@@ -12,7 +12,7 @@ import { OtpInput } from "@/components/forms/otp-input";
 import { InlineAlert } from "@/components/forms/inline-alert";
 import { mockApi } from "@/lib/auth/mock-api";
 import type { UserProfile } from "@/lib/auth/types";
-import {mockDb} from "@lib/auth"
+//import {mockDb} from "@lib/auth"
 type Step = "details" | "verify";
 
 const YEAR_OPTIONS = [

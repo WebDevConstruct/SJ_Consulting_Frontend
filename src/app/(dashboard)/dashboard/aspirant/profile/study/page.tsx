@@ -12,8 +12,6 @@ import { InvitePeerOverlay } from "@/components/study/invite-peer-overlay";
 import { CbtRunnerOverlay } from "@/components/study/cbt-runner-overlay";
 import { usePeerSession } from "@/lib/study/peer-session-store";
 import type { CbtMode, PeerSession, SubmissionResult } from "@/lib/study/types";
-import {AccountCompletionRequired} from  "@components/SettingUpModals/AccounCompletionRequired";
-import {mockApi} from "@lib/auth"
 
 type Modal =
   | "none"
@@ -77,8 +75,6 @@ export default function StudyHubPage() {
     setRunnerOpen(false);
   };
 
-  const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.college
-
   return (
     <div className="px-6 py-10 md:px-12 md:py-14">
       <div className="h-[2px] w-12 bg-gold-metal" />
@@ -93,10 +89,6 @@ export default function StudyHubPage() {
         rounds open full-screen so nothing distracts from the questions.
       </p>
 
-
-   <div >
-   {account_completion_info !== undefined && account_completion_info?.length > 0 ? (
-   <div>
       {peerSession ? (
         <button
           type="button"
@@ -116,10 +108,10 @@ export default function StudyHubPage() {
         </button>
       ) : null}
 
-    {lastResult ? (
+      {lastResult ? (
         <div className="mt-6 max-w-lg rounded-sm border border-paper-line bg-paper-soft px-4 py-3 text-[13.5px] text-current/70 dark:border-ink-line dark:bg-ink-surface">
-          Last round: {lastResult?.correct}/{lastResult?.total} (
-          {lastResult?.scorePercent}%)
+          Last round: {lastResult.correct}/{lastResult.total} (
+          {lastResult.scorePercent}%)
         </div>
       ) : null}
 
@@ -180,13 +172,6 @@ export default function StudyHubPage() {
         onExit={() => setRunnerOpen(false)}
         onFinish={handleRunnerFinish}
       />
-    
     </div>
-    
-    ) : (
-      <AccountCompletionRequired />
-    )}
-    </div>
-    </div>
-  )
+  );
 }

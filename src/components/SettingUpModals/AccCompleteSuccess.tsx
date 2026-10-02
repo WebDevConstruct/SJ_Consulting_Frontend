@@ -8,20 +8,20 @@ type successProps = {
     subtext : string,
     buttonTextOne : string,
     buttonTextTwo : string,
-    buttonTextThree : string,
+
     onClickOne : ()=> void,
     onClickTwo : ()=> void,
-     onClickThree : ()=> void
+
 }
 export const AccCompleteSuccess = ({Header, text, subtext, buttonTextOne,
-      buttonTextTwo, buttonTextThree,
-    onClickOne, onClickTwo, onClickThree} : successProps) => {
+      buttonTextTwo,
+    onClickOne, onClickTwo, } : successProps) => {
   return (
     <Modal>
-    <div className="flex flex-col items-center  justify-center h-full w-full ">
-      <div className="h-screen w-full  px-5 md:w-1/2 py-20 md:pr-10  md:h-3/4 rounded-lg
+    <div className="flex flex-col items-center  justify-center h-full w-full">
+      <div className="lg:relative right-[120px] h-screen w-full  px-5 md:w-1/2 py-20 md:pr-10  md:h-[90%] rounded-lg
        bg-paper-soft overflow-y-scroll [&::-webkit-scrollbar]:hidden 
-        [scrollbar-width:none] justify-center items-center
+        [scrollbar-width:none] justify-center items-center lg:border lg:border-gray-300
        dark:bg-ink-surface flex flex-col gap-10">
 
       <h1 className="text-2xl font-bold text-center">
@@ -44,8 +44,7 @@ export const AccCompleteSuccess = ({Header, text, subtext, buttonTextOne,
  className={"w-1/2 bg-gold-metal-soft text-white"} onClick={onClickOne} />
  <Button type={"submit"} text={buttonTextTwo}
   className={"w-1/2 bg-paper-soft text-[#C9A227] border border-[#C9A227]"} onClick={onClickTwo} />
-  <Button type={"submit"} text={buttonTextThree}
-  className={"w-1/2 bg-paper-soft text-[#C9A227] border border-[#C9A227] "} onClick={onClickThree} />
+
       
       </div>
     

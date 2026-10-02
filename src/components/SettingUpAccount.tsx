@@ -8,7 +8,7 @@ export const SettingUpAccount = ()=> {
     const {accountCompletionState,  setAccountCompletionState} = useGlobalContext();
     const account_completion = mockApi?.getCurrentUser()?.accountVerification
     return (
-        <div className="flex flex-col gap-2 w-full  bg-white dark:bg-ink 
+        <div className="flex flex-col gap-2 w-full my-3 bg-white dark:bg-ink 
          rounded-md border animate-none p-5">
             <div onClick={()=> {
                 if(account_completion === null){

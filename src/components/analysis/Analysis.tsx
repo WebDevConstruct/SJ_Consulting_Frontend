@@ -60,9 +60,10 @@ const userId = user?.id || ""
  border-b  border-gold-500" key={index}>
                      <select className="w-[300px] h-[30px] dark:text-white text-black">
                         <option className="dark:text-white text-black"
-                         value="daily"/>
-                         <option value="weekly"/>
-                          <option value="monthly"/>
+                         value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                       
                      </select>
                 </div>
                     )

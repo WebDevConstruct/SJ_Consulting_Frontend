@@ -16,7 +16,7 @@ export interface AspirantAccountVerificationType {
   college : string,
   faculty : string,
   department : string,
-  writtenJamb ?: boolean
+  //writtenJamb ?: boolean
 }
 
 /**
@@ -32,7 +32,7 @@ export interface StoredUser {
   email: string;
   phone: string;
   password: string;
-  userProfile: UserProfile;
+  userProfile: UserProfile | string;
   accountVerification : AspirantAccountVerificationType | UndergraduteAccountVerificationType | null;
   emailVerified: boolean;
   pendingOtp: string | null;

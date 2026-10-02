@@ -7,10 +7,12 @@ import { Trophy, Users } from "lucide-react";
 import { useSession } from "@/lib/auth/use-session";
 import {Analysis} from "@components/analysis";
 import {SettingUpAccount} from "@components/SettingUpAccount";
-import {mockApi} from "@lib/auth";
+import {mockApi, mockDb} from "@lib/auth";
 import InitialSetUp from "@components/SettingUpModals/InitialSetUp";
 import {useGlobalContext} from "../../../../../Context";
 import {AccCompleteSuccess} from "@components/SettingUpModals/AccCompleteSuccess";
+import type {StoredUser, AspirantAccountVerificationType} from "@lib/auth/types";
+import {useRouter} from "next/navigation";
 const NEXT_JAMB_DATE = new Date("2027-04-10T09:00:00");
 
 function useCountdown(target: Date) {
@@ -40,14 +42,44 @@ const LEADERBOARD_PREVIEW = [
 
 
 export default function AspirantDashboardPage() {
+  const route = useRouter()
     const {accountCompletionState,  setAccountCompletionState,
-      accountCompleteSuccess, setAccountCompleteSuccess} = useGlobalContext()
+      accountCompleteSuccess, collegeValue, departmentValue, facultyValue, setAccountCompleteSuccess, setDepartmentValue, setCollegeValue, setFacultyValue} = useGlobalContext()
 //  const accountVerification_needed = mockApi?.getCurrentUser()?.accountVerification === null ? true : false;
 
   const { user } = useSession();
   const countdown = useCountdown(NEXT_JAMB_DATE);
+  const accountCompletionFunc  = ()=> {
+const account_complete_verification : AspirantAccountVerificationType = {
+      subjectCombination : [],
+      college : collegeValue,
+      department : departmentValue,
+      faculty : facultyValue
+  }
 
-
+   const payload : StoredUser = {
+    id : String(user?.id ?? "") ,
+    name : String(user?.name ?? "").trim(),
+   age: Number(user?.age),
+      username: String(user?.username ?? "").trim(),
+      email: String(user?.email?? "").trim(),
+      phone: String(user?.phone ?? "").trim(),
+      password: String(user ?? ""),
+      pendingOtp :null,
+      emailVerified : Boolean(user?.emailVerified),
+      createdAt : Number(user?.createdAt),
+      userProfile: String(user?.userProfile ?? "")?.trim(),
+     accountVerification: account_complete_verification,
+    };
+    // CLEARING OF STATES
+     setAccountCompletionState(false)
+       setAccountCompleteSuccess(true)
+       setDepartmentValue("")
+       setCollegeValue("");
+       setFacultyValue("")
+  return mockDb?.update(user?.id || "", payload)
+}
+const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.college
   // const handleAccountCompletion = ()=> {
     
   // }
@@ -61,8 +93,7 @@ export default function AspirantDashboardPage() {
       userProfile={"aspirant"}
       buttonText="Submit"
       buttonClick={()=>{
-       setAccountCompletionState(false)
-       setAccountCompleteSuccess(true)
+        accountCompletionFunc();
       }}
       />}
      { accountCompleteSuccess 
@@ -71,13 +102,14 @@ export default function AspirantDashboardPage() {
       text={"Success"} 
       subtext={"You can now access all features of the platform."}
       buttonTextOne={"Study Now"}
-        buttonTextTwo={"Practice MCQs"}
-        buttonTextThree={"Done"}
+        buttonTextTwo={"Done"}
+     
         onClickOne={()=> {
           setAccountCompleteSuccess(false)
+          route?.replace("/dashboard/aspirant/study")
           }}
          onClickTwo={()=> setAccountCompleteSuccess(false)}
-         onClickThree={()=> setAccountCompleteSuccess(false)}
+
         />
          }
        {/* ADDING OF COMPONENTS THAT ARE IN  ABSOLUTE STATE */}
@@ -109,7 +141,8 @@ export default function AspirantDashboardPage() {
           </div>
         ) : null}
       </motion.div>
-   <SettingUpAccount/>
+      
+  {account_completion_info === undefined   && <SettingUpAccount/>}
 {/* ==============\\\\\\\\\\\\\================== */}
   <Analysis/>
 

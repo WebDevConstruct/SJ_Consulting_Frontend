@@ -113,7 +113,7 @@ export const facultyDepartments = {
 };
 
 export const InputArray = [
-    {label : "Subject Combination", inputType : "text",
+    {id : "s_combination",label : "Subject Combination", inputType : "text",
   isDropdown : true,
    dropdown : ["English",
              "Mathematics", 
@@ -123,15 +123,15 @@ export const InputArray = [
                "Literature-in-English",
                 "Agricultural Science",
                  "Geography"]},
-                 {label : "College of Choice",
+                 {id : "college", label : "College of Choice",
                      inputType : "text",
                       isDropdown : true, dropdown : ["University of Lagos (UNILAG)"]},
-                    {label : "Faculty of Choice", inputType : "text",
-                         isDropdown : true, dropdown : ["Faculty of Arts", "Faculty of Education", "Faculty of life Sciences", "Faculty of Basic Medical Sciences",
-                             "Faculty of Dental Sciences", "Faculty of Engineering",  "faculty of Clinical sciences", "Faculty of Management Sciences",
+                    {id : "faculty", label : "Faculty of Choice", inputType : "text",
+                         isDropdown : true, dropdown : ["Faculty of Arts", "Faculty of Education", , "Faculty of Basic Medical Sciences",
+                             "Faculty of Dental Sciences", "Faculty of Engineering",  "Faculty of Clinical sciences", "Faculty of Management Sciences",
                               "Faculty of Environmental Sciences", "Faculty of Law", "Faculty of Sciences", "Faculty of Social Sciences"],
                             },
-                                 {label : "Department of Choice", inputType : "text",
-                         isDropdown : true, dropdown : [],
+                                 {id : "department", label : "Department of Choice", inputType : "text",
+                         isDropdown : true,
                             }
 ]
