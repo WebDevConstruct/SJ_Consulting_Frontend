@@ -125,7 +125,7 @@ export default function UndergraduateDashboardPage() {
 
 
 
-        <Link href="/dashboard/undergraduates/profile" className="border border-gold-300 w-[50px] h-10 rounded-full">
+        <Link href="/dashboard/undergraduate/profile" className="border border-gold-300 w-[50px] h-10 rounded-full">
           <User className="h-10 w-10 p-3 text-ink"/>
           </Link>
           </div>
