@@ -146,7 +146,7 @@ const checkAspirantMetaData : boolean
          border-paper-line pb-8 dark:border-ink-line 
          sm:items-center sm:justify-between"
       >
-        <div className="flex justify-between gap-5">
+        <div className="flex justify-between gap-5 items-center">
         <div className="flex justify-start w-full">
           <h1 className="font-display text-[26px] text-start uppercase leading-tight sm:text-[30px]">
             Welcome back, {userAuthInfo?.username  ?  userAuthInfo?.username :  "Hi there"} 👋.
@@ -158,8 +158,9 @@ const checkAspirantMetaData : boolean
 
 
 
-        <Link href="/dashboard/aspirant/profile" className="border border-gold-300 w-[50px] h-10 rounded-full">
-          <User className="h-10 w-10 p-3 text-ink"/>
+        <Link href="/dashboard/aspirant/profile"  className="border border-gold-300 dark:bg-ink-soft 
+  d w-[50px] h-10 rounded-full bg-paper-soft">
+          <User className="h-10 w-10 p-3 text-ink dark:text-paper-surface"/>
           </Link>
           </div>
        
