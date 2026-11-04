@@ -2,9 +2,8 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth/use-session";
 import type { UserProfile } from "@/lib/auth/types";
-
+import {createClient} from "@lib/supabase/client";
 interface RequireAuthProps {
   profile: UserProfile;
   children: ReactNode;
@@ -12,29 +11,39 @@ interface RequireAuthProps {
 
 export function RequireAuth({ profile, children }: RequireAuthProps) {
   const router = useRouter();
-  const { status, user } = useSession();
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/signin");
+const supabase = createClient()
+
+  const currentUser = async() => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error fetching user:", error);
+      router?.replace("/signin")
       return;
     }
-    if (status === "authenticated" && user && user.userProfile !== profile) {
-      router.replace(`/dashboard/${user.userProfile}`);
+    if (data) {
+      console.log("Current user:", data);
+      
     }
-  }, [status, user, profile, router]);
+  };
 
-  const ready =
-    status === "authenticated" && user && user.userProfile === profile;
+  useEffect(() => {
+      async function checkAuth(){
+        await currentUser()
+      }
+      checkAuth();
+  }, []);
 
-  if (!ready) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center
-      font-ui-sans-serif bg-paper dark:bg-ink">
-        <span className="text-[13.5px] text-current/45">Loading…</span>
-      </div>
-    );
-  }
+
+
+
+    // return (
+    //   <div className="flex min-h-[60vh] items-center justify-center
+    //   font-ui-sans-serif bg-paper dark:bg-ink">
+    //     <span className="text-[13.5px] text-current/45">Loading…</span>
+    //   </div>
+    // );
+  
 
   return <>{children}</>;
 }

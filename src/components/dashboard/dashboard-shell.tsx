@@ -4,16 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
-import { useSession } from "@/lib/auth/use-session";
+import {useRouter} from "next/navigation";
+import {createClient} from "@lib/supabase/client";
+import { useGlobalContext} from "../../../Context";
+import { type usermetadata} from "@/types/UserTypes";
 
 interface DashboardShellProps {
   navItems: DashboardNavItem[];
   children: React.ReactNode;
 }
 
+
+
+const supabase = createClient()
 export function DashboardShell({ navItems, children }: DashboardShellProps) {
   const pathname = usePathname();
-  const { user, logout } = useSession();
+  const router = useRouter();
+  const {  userAuthInfo, setUserAuthInfo} = useGlobalContext()
 
   const isActive = (href: string) =>
     href === pathname ||
@@ -21,12 +28,25 @@ export function DashboardShell({ navItems, children }: DashboardShellProps) {
     && (pathname.startsWith(`/${href}`) || pathname?.startsWith(`/${href}`)))
 
 
+    //=======THE LOGOUT FUNCTIONALITY =====================\\\\\\\
+     const handleSignOut = async () => {
+    await supabase.auth.signOut({ scope: "local" });
+    setUserAuthInfo({} as usermetadata)
+    router.replace("/signin");
+    router.refresh();
+  };
+
 
    
   return (
-    <div className="flex min-h-screen bg-paper dark:bg-ink">
+    <div className="flex min-h-screen bg-paper
+     dark:bg-ink">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 flex-col border-r border-paper-line bg-paper-soft dark:border-ink-line dark:bg-ink-soft md:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 
+      flex-shrink-0 flex-col border-r
+       border-paper-line bg-paper-soft
+        dark:border-ink-line dark:bg-ink-soft
+         md:flex">
         <Link href="/" className="focus-gold px-7 pt-8">
           <span className="font-display text-[20px] leading-none">
             SJ <span className="text-gold-foil">Consult</span>
@@ -57,14 +77,14 @@ export function DashboardShell({ navItems, children }: DashboardShellProps) {
 
         <div className="border-t border-paper-line px-4 py-5 dark:border-ink-line">
           <div className="px-3 text-[13px] font-medium text-current/80">
-            {user?.name ?? "—"}
+            {userAuthInfo?.username ?? ""}
           </div>
           <div className="px-3 text-[12px] text-current/45">
-            @{user?.username ?? "—"}
+            @{userAuthInfo?.username ?? ""}
           </div>
           <button
             type="button"
-            onClick={logout}
+            onClick={handleSignOut}
             className="focus-gold mt-4 flex w-full items-center gap-2.5 rounded-sm px-3 py-2.5 text-[13.5px] font-medium text-current/60 transition-colors hover:bg-current/5 hover:text-red-600 dark:hover:text-red-300"
           >
             <LogOut className="h-4 w-4" strokeWidth={1.7} />

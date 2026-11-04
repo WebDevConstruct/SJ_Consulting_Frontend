@@ -3,6 +3,40 @@
 import {useGlobalContext} from "../../../Context";
 
 
+export interface SubjectItem {
+  id: number;
+  subject: string;
+  subjectChosen: boolean;
+}
+
+export const subjectChoiceState = [ 
+{id : 0, subject :"English Language", subjectChosen : false}, 
+{id : 1, subject :"Mathematics", subjectChosen : false}, 
+{id : 2, subject :"Further Mathematics", subjectChosen : false}, 
+{id : 3, subject :"Physics", subjectChosen : false}, 
+{id : 4, subject :"Chemistry", subjectChosen : false}, 
+{id : 5, subject :"Biology", subjectChosen : false}, 
+ {id : 6, subject :"Economics", subjectChosen : false},
+ {id : 7, subject :"Government", subjectChosen : false},
+ {id : 8, subject :"Geography", subjectChosen : false},
+ {id : 9, subject :"History", subjectChosen : false},
+{ id : 10, subject :"Literature-in-English", subjectChosen : false},
+ {id : 11, subject :"CRS/IRS", subjectChosen : false},
+{ id : 12, subject :"French", subjectChosen : false},
+ {id : 13, subject :"Agricultural Science", subjectChosen : false},
+ {id : 14, subject :"Commerce", subjectChosen : false},
+{ id : 15, subject :"Accounting", subjectChosen : false},
+ {id : 16, subject :"Fine Arts", subjectChosen : false},
+ {id : 17, subject :"Technical Drawing", subjectChosen : false},
+ {id : 18, subject :"Igbo", subjectChosen : false},
+ {id : 19, subject :"Yoruba", subjectChosen : false},
+{ id : 20, subject :"Arabic", subjectChosen : false},
+ {id : 21, subject :"Civic Education", subjectChosen : false},
+ {id : 22, subject :"Data Processing/Computer Studies", subjectChosen : false},
+ {id : 23, subject :"Music", subjectChosen : false},
+{ id : 24, subject :"Business Management/Studies", subjectChosen : false},
+ {id : 25, subject :"Nigerian Language", subjectChosen : false}
+  ];
 
 
 export const facultyDepartments = {
@@ -115,21 +149,14 @@ export const facultyDepartments = {
 export const InputArray = [
     {id : "s_combination",label : "Subject Combination", inputType : "text",
   isDropdown : true,
-   dropdown : ["English",
-             "Mathematics", 
-             "Physics", "Chemistry",
-              "Biology", "Economics",
-               "Government", 
-               "Literature-in-English",
-                "Agricultural Science",
-                 "Geography"]},
+   dropdown : [""]},
                  {id : "college", label : "College of Choice",
                      inputType : "text",
                       isDropdown : true, dropdown : ["University of Lagos (UNILAG)"]},
                     {id : "faculty", label : "Faculty of Choice", inputType : "text",
-                         isDropdown : true, dropdown : ["Faculty of Arts", "Faculty of Education", , "Faculty of Basic Medical Sciences",
-                             "Faculty of Dental Sciences", "Faculty of Engineering",  "Faculty of Clinical sciences", "Faculty of Management Sciences",
-                              "Faculty of Environmental Sciences", "Faculty of Law", "Faculty of Sciences", "Faculty of Social Sciences"],
+                         isDropdown : true, dropdown : ["Arts", "Education", , "Basic Medical Sciences",
+                             "Dental Sciences", "Engineering",  "Clinical sciences", "Management Sciences",
+                              "Environmental Sciences", "Law", "Sciences", "Social Sciences"],
                             },
                                  {id : "department", label : "Department of Choice", inputType : "text",
                          isDropdown : true,

@@ -6,39 +6,68 @@ import Link from "next/link";
 import { AuthLayout } from "@/components/forms/auth-layout";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
-import { InlineAlert } from "@/components/forms/inline-alert";
-import { mockApi } from "@/lib/auth/mock-api";
-
+import {createClient} from "@/lib/supabase/client";
+import {useStatusToast} from "@components/ui/status-toast";
 export function SignInForm() {
+  const {showToast} = useStatusToast()
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
-
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("")
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setNeedsVerification(false);
+ event.preventDefault()
     setSubmitting(true);
-
-    const form = new FormData(event.currentTarget);
-    const result = await mockApi.signIn({
-      identifier: String(form.get("identifier") ?? "").trim(),
-      password: String(form.get("password") ?? ""),
+const supabase = createClient()
+ 
+try{
+  console.log("Running")
+    const {data, error : responseError} = await supabase.auth.signInWithPassword({
+      email : String(email ?? "").trim(),
+      password: String(password ?? ""),
       // Sent alongside every sign-in request per the brief, for device monitoring.
-      userAgent:
-        typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+     
     });
 
     setSubmitting(false);
 
-    if (!result.success) {
-      setError(result.error ?? "Something went wrong. Please try again.");
-      setNeedsVerification(Boolean(result.needsVerification));
-      return;
-    }
-
+if(responseError){
+   showToast({
+      kind : "error",
+      title : "Error Signing In",
+      message : "An error occurred while signing in.",
+      statusCode : Number(responseError.code) 
+    })
+// console.log("SignInError", {
+//   name : error?.name,
+//   code : error?.code,
+//   message : error?.message
+// });
+}
+if(data.user){
+  console.log(data.user);
+   showToast({
+      kind : "success",
+      title : "Success",
+      message : "SignIn Successful",
+      statusCode : 200
+    })
     router.push("/dashboard");
+}
+}catch(error){
+  if( error){
+  showToast({
+      kind : "error",
+      title : "Error Signing In",
+      message : "Error Signing in. Please check your credentials and try again.",
+      statusCode : 500 
+    })
+
+  }
+
+  setError("Error Signing in")
+}
   };
 
   return (
@@ -50,7 +79,7 @@ export function SignInForm() {
       footerLinkLabel="Create an account"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {error ? (
+        {/* {error ? (
           <InlineAlert tone="error">
             {error}{" "}
             {needsVerification ? (
@@ -62,9 +91,11 @@ export function SignInForm() {
               </Link>
             ) : null}
           </InlineAlert>
-        ) : null}
+        ) : null} */}
 
         <TextField
+        value={email}
+        onChange={(e)=> setEmail(e.target.value)}
           label="Username or email"
           name="identifier"
           type="text"
@@ -75,6 +106,8 @@ export function SignInForm() {
 
         <div>
           <PasswordField
+          value={password}
+          onChange={(e)=> setPassword(e.target.value)}
             label="Password"
             name="password"
             autoComplete="current-password"

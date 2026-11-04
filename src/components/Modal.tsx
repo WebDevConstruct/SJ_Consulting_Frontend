@@ -6,6 +6,6 @@ export const Modal = ({children} : {children : React.ReactNode}) => {
    backdrop-blur-lg">
      {children}
     </div>
-  )
+)
 }
 

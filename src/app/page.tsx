@@ -7,6 +7,8 @@ import {CookiesDisplay} from "@components/Cookies/cookiesDisplay"
 import { useGlobalContext } from "../../Context";
 import {useEffect} from "react";
 
+
+
 export default function Home() {
 
 

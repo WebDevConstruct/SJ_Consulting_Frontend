@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import {useSession, session} from "@lib/auth"
+
 
 /**
  * The analysis component is a graph displaying the relationship between the number of days and the practiced sessions.
@@ -12,11 +12,23 @@ import {useSession, session} from "@lib/auth"
   
    type trackStudiedType = {
         questionsAnswered : number,
-        track : "subject" | "topic" | "s_combination",
         num_times : number,
         perf_Agg : string
     }
 
+export interface RecentAttempt {
+  id: string;
+  subject: string;
+  track_type: "subject" | "topic" | "combination";
+  mode: "solo" | "peer";
+  exam_type: string;
+  total_questions: number;
+  score: number;
+  /** Score as a percentage, e.g. 72.5 */
+  score_pct: number;
+  time_spent_seconds: number;
+  attempted_at: string;
+}
 
 
 
@@ -24,22 +36,22 @@ type analysisDataType = {
     id : number,
     userId : string,
     date : string,
+     track :  "s_combination" | "college" | "department" | "faculty",
     sessions_opened_total : number,
     trackStudied : trackStudiedType[],
  }
 
 export const Analysis = () => {
-const { user }  = useSession();
-const userId = user?.id || ""
+
+//const userId = user?.id || ""
 
 //A mock Analysis data 
     const analysisData : analysisDataType[] = [
-        {id : 0, userId : userId, date : "2023-01-01",
-             sessions_opened_total : 5, 
+        {id : 0, userId : "", date : "2023-01-01",
+             sessions_opened_total : 5,  track :  "s_combination",
              trackStudied : [
                      {
         questionsAnswered : 60,
-        track :  "s_combination",
         num_times : 2,
         perf_Agg : "70%"
     }

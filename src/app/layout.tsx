@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import {ContextProvider} from "../../Context";
+import {StatusToastProvider} from "@components/ui/status-toast"
 export const metadata: Metadata = {
   title: "SJ Consult — JAMB & UNILAG Guidance, Verified",
   description:
@@ -35,12 +36,14 @@ export default function RootLayout({
       </head>
       <body>
         <ContextProvider>
+          <StatusToastProvider>
         <ThemeProvider>
           
           <Navbar />
           <main className="font-ui-sans-serif">{children}</main>
           <Footer />
         </ThemeProvider>
+        </StatusToastProvider>
         </ContextProvider>
          <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </body>

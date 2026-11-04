@@ -1,27 +1,20 @@
 "use client";
-import {useState, useRef} from "react"
+import {useState, useRef, useEffect} from "react"
 import { motion } from "framer-motion";
 import {
-  Calculator,
-  FileCheck,
-  GraduationCap,
-  Landmark,
-  Sparkles,
+
   ChevronRight,
   ChevronLeft
 } from "lucide-react";
-import { informationSections } from "@/lib/mock-data";
 import { ScrollCue } from "@/components/ui/scroll-cue";
-import {informationData} from "../assets/information";
+//import {informationData} from "../assets/information";
 import Image from "next/image";
-import Link from "next/link"
-const ICONS = {
-  sparkles: Sparkles,
-  landmark: Landmark,
-  "file-check": FileCheck,
-  calculator: Calculator,
-  "graduation-cap": GraduationCap,
-};
+import Link from "next/link";
+import {getAnnouncements,} from "@lib/api";
+import type {InformationCategory} from "@/components/assets/information";
+import type { AnnouncementRecord } from "@/types/announcementTypes";
+
+
 
 
  
@@ -31,6 +24,17 @@ export function Information() {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 const [syncDotsWithCarousel, setSyncDotsWithCarousel] = useState<number>(0);
+const [announcements, setAnnouncements] = useState<AnnouncementRecord[] | null>(null);
+
+
+useEffect(()=> {
+  async function fetchAnnouncements(){
+    const data = await getAnnouncements()
+    setAnnouncements(data)
+    console.log(data);
+  }
+  fetchAnnouncements()
+},[])
   const updateEdges = () => {
     const el = trackRef.current;
     if (!el) return;
@@ -38,6 +42,8 @@ const [syncDotsWithCarousel, setSyncDotsWithCarousel] = useState<number>(0);
     setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
   };
  
+
+  
   const scrollBy = (direction: 1 | -1) => {
     const el = trackRef.current;
   //  console.log(el)
@@ -64,6 +70,51 @@ direction === 1     ? prev + 1 : prev-1)
   //    if(!el) return;
   //    settSyncDotsWithCarousel(Math.round(el.scrollLeft /el.clientWidth))
   // }, 2000)
+const filterByCatMentor : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "mentorship") || [];
+const filterByCatJamb : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "jamb") || []
+const filterByCatAccomodation : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "accommodation") || []
+const filterByCatUnderGraduate : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "unilag") || []
+console.log("filterByCatMentor", filterByCatMentor)
+console.log("filterByCatJamb", filterByCatJamb)
+console.log("filterByCatAccomodation", filterByCatAccomodation)
+console.log("filterByCatUnderGraduate", filterByCatUnderGraduate)
+
+const informationData: InformationCategory[] = [
+  {
+    type: "jamb",
+    title: "Exam Body Guidelines & Updates",
+    description: "Examination updates, guidelines, syllabus changes, and official gazette bulletins directly from JAMB and national examination bodies.",
+
+    link : "/jamb",
+  data: filterByCatJamb
+  },
+  {
+    type: "unilag",
+    title: "College Entry Guidelines",
+    description: "Accurate and timely institutional admission guidelines, Post-UTME screening requirements, and departmental cut-off rules.",
+    link : "/unilag",
+    data: filterByCatUnderGraduate
+  },
+  {
+    type: "mentorship",
+    title: "Mentorship & Scholarship",
+    description: "Mentorship guides, hackathons, and scholarship opportunities from reputable organizations for ambitious youths and students. DON'T MISS OUT!",
+    link : "/mentorship",
+    data:  filterByCatMentor
+  },
+  {
+    type: "accommodation",
+    title: "Undergraduate Information & Correspondents",
+    description: "Campus notices, course registration deadlines, dockets, GST login access, continuous assessment updates, and campus accommodation alerts.",
+    link : "/accommodation",
+    data:  filterByCatAccomodation
+  }
+];
+
+
+
+//console.log(informationData?.[0]?.data);
+
   return (
     <section
       id="information"
@@ -98,6 +149,7 @@ direction === 1     ? prev + 1 : prev-1)
          rounded-sm border border-paper-line  dark:border-ink-line ">
           {informationData.map((item, index) => {
             //const Icon = ICONS[item.icon];
+            console.log(item?.data)
             return (
              
            
@@ -113,38 +165,57 @@ direction === 1     ? prev + 1 : prev-1)
                 className={`w-full  rounded-md border-1 border-gray-100 overflow-y-hidden item-card
                    ${index == 0 || index === 2 ? "bg-paper-soft" : index === 1 || index === 3 ? "bg-paper-line" : ""}  
                     flex-shrink-0 basis-full bg-paper p-8
-                 dark:bg-ink lg:h-screen md:h-[400px] h-full flex flex-col gap-5 py-15`}>
+                 dark:bg-ink lg:h-screen md:h-[600px] h-[700px] flex flex-col gap-5 py-15`}>
 
-                    <h2 className="text-[30px] leading-tight text-current/80 text-center font-bold">
-
-                 {item?.title}
+                    <h2 className="text-[30px] leading-tight text-current/80 
+                    text-center font-bold">
+               {item?.title}
                  </h2>
-                 <div className="flex flex-col lg:flex-row gap-5 h-full w-full">
-
-                      {item?.data?.map((news, i)=> (
+                 <div className="flex flex-col lg:flex-row gap-5 
+                 w-full lg:h-[450px] h-[650px]">
+                    {item?.data?.length > 0 ? (
+                      item?.data?.map((news, i)=> (
                         i < 4  && (
-                    <div className={`   ${i !== 0 ? "hidden lg:block" : ""} border-3 
-                     border-gray-100 rounded-xl py-10 h-full w-full`} 
+                    <div className={`   ${i !== 0 ? "hidden lg:block" : ""} border-[3px] shadow-md 
+                     border-gray-100 rounded-xl  lg:w-1/4 md:w-1/3 w-full h-full`} 
                     key={i}>
 
-                 {/* <Image width={400} height={400} className={"object-cover w-full"} 
-                 src={news?.image} alt={item?.description}/> */}
-                 <div className="w-full h-1/3 bg-gray-200 "/>
-                   <div className="h-[67.333%] p-4 flex flex-col justify-between overflow-y-hidden">
+                 <div className="w-full h-1/3 flex items-start rounded-xl">
+                   {news?.image_url?.length ? (
+                 <Image width={400} height={400} className={"object-cover rounded-t-xl w-full h-full "} 
+                 src={news.image_url} alt={item?.description}/>
+                   ) : (
+                    <div className="w-full h-full bg-gray-200"/>
+                   )}
+                 </div>
+                   <div className="h-[67.333%] w-full p-4 flex flex-col 
+                   justify-between overflow-y-hidden">
                     <div className="h-full">
                     <h2 className="lg:text-[16px] lg:leading-[20px] text-[13px] leading-[18x] font-semibold text-current/80">
-  {news?.topic}
+  {news?.title}
                     </h2> 
                   <i className="text-sm text-current/70">
-                 {news?.short_message}
+                 {news?.summary ? `${news?.summary?.slice(0,100)}...` : ""}
                   </i>
-                  <p> {news?.long_message}</p>
+                  <p className="text-sm font-medium"> 
+                    { `${news?.content?.slice(0, 100)}...` || ""}</p>
                   </div>
-                  <p className="text-[10px]  font-semibold">{news?.date}</p>
+                  <p className="text-[10px]  font-semibold">
+                    {news?.created_at ? new Date(news?.created_at).toString()?.slice(4, news?.created_at?.length -16) : ""}
+                    </p>
+
+                  <Link href={`/${news?.category}/${news?.slug}`} 
+                  className="text-sm text-color-gold-metal
+                   text-end">
+                  Read more
+                  </Link>
                    </div>
              
                      </div>
-                       ) ))}
+                       ) ))): (
+                        <div className="">
+                          </div>
+                       )}
                        </div>
                   <div className="flex justify-end w-full flex-col gap-1">
                    <Link href={item?.link}
@@ -167,7 +238,8 @@ direction === 1     ? prev + 1 : prev-1)
                 </div>
                  <div className="p-2 flex justify-center w-full gap-2">
                   {informationData?.map((items, i)=> (
-                  <div className={`w-3 h-3 rounded-full ${syncDotsWithCarousel === i ?  "bg-gold-metal-soft" : "bg-gray-300"}`} key={i}/>
+                  <div className={`w-3 h-3 rounded-full ${syncDotsWithCarousel === i ?  "bg-gold-metal-soft" : "bg-gray-300"}`}
+                   key={i}/>
                   ))}
                 </div>
                

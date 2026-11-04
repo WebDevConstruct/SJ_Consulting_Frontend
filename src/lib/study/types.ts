@@ -11,7 +11,7 @@ export interface Topic {
   summary: string;
 }
 
-export type Track = "subject" | "topic" | "combination";
+export type CbtTrack = "subject" | "topic" | "combination" | "courses";
 export type PacingMode = "self-paced" | "time-initiated";
 export type CbtMode = "practice" | "exam";
 
@@ -31,10 +31,13 @@ export interface Question {
 export type PeerSessionStatus = "pending" | "accepted";
 
 export interface PeerSession {
-  id: string;
+  session_id: string;
   invitee: string;
-  track: Track;
-  pacing: PacingMode;
+  track: CbtTrack;
+  kind : "peer"
+   question_count : number;
+   duration_seconds : number;
+   submit_deadline : string | null;
   subject: string;
   status: PeerSessionStatus;
   connectionId: string | null;

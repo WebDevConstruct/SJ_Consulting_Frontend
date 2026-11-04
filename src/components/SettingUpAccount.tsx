@@ -3,15 +3,16 @@ import React from "react";
 import {ArrowRight} from "lucide-react";
 import Image from "next/image";
 import {useGlobalContext} from "../../Context"
-import {mockApi} from "@lib/auth"
-export const SettingUpAccount = ()=> {
-    const {accountCompletionState,  setAccountCompletionState} = useGlobalContext();
-    const account_completion = mockApi?.getCurrentUser()?.accountVerification
+
+export const SettingUpAccount = ({affirm_account_verification} : {affirm_account_verification : boolean} )=> {
+ 
+    const {  setAccountCompletionState} = useGlobalContext();
+   
     return (
         <div className="flex flex-col gap-2 w-full my-3 bg-white dark:bg-ink 
          rounded-md border animate-none p-5">
             <div onClick={()=> {
-                if(account_completion === null){
+                if(affirm_account_verification === true){
                 setAccountCompletionState(true);
                 }
             }}

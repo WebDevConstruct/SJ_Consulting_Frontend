@@ -3,20 +3,29 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Trophy, Users } from "lucide-react";
-import { useSession } from "@/lib/auth/use-session";
+import { Trophy, Users, User } from "lucide-react";
 import {Analysis} from "@components/analysis";
 import {SettingUpAccount} from "@components/SettingUpAccount";
-import {mockApi, mockDb} from "@lib/auth";
 import InitialSetUp from "@components/SettingUpModals/InitialSetUp";
 import {useGlobalContext} from "../../../../../Context";
 import {AccCompleteSuccess} from "@components/SettingUpModals/AccCompleteSuccess";
-import type {StoredUser, AspirantAccountVerificationType} from "@lib/auth/types";
+import type {AspirantAccountVerificationType} from "@lib/auth/types";
 import {useRouter} from "next/navigation";
+import {createClient} from "@lib/supabase/client";
+import {useStatusToast} from  "@/components/ui/status-toast";
+import type {usermetadata} from "@/types/UserTypes";
+import {useDashboardPreview} from "../../../../hooks/use-dashboard-preview";
+import { LeaderboardPreview } from "@/components/dashboard/leaderboard-preview";
+import { PerformanceAnalysis } from "@/components/dashboard/performance-analysis";
+
+
+
+
 const NEXT_JAMB_DATE = new Date("2027-04-10T09:00:00");
 
 function useCountdown(target: Date) {
   const [remaining, setRemaining] = useState<number | null>(null);
+ 
   useEffect(() => {
     const update = () => setRemaining(target.getTime() - Date.now());
     update();
@@ -42,57 +51,72 @@ const LEADERBOARD_PREVIEW = [
 
 
 export default function AspirantDashboardPage() {
-  const route = useRouter()
+  const { preview, loading, error } = useDashboardPreview();
+  const route = useRouter();
+  const supabase = createClient();
     const {accountCompletionState,  setAccountCompletionState,
-      accountCompleteSuccess, collegeValue, departmentValue, facultyValue, setAccountCompleteSuccess, setDepartmentValue, setCollegeValue, setFacultyValue} = useGlobalContext()
+      accountCompleteSuccess, collegeValue, departmentValue,
+       facultyValue, setAccountCompleteSuccess, setDepartmentValue,
+        setCollegeValue, setFacultyValue, userAuthInfo, setUserAuthInfo} = useGlobalContext()
 //  const accountVerification_needed = mockApi?.getCurrentUser()?.accountVerification === null ? true : false;
 
-  const { user } = useSession();
   const countdown = useCountdown(NEXT_JAMB_DATE);
-  const accountCompletionFunc  = ()=> {
-const account_complete_verification : AspirantAccountVerificationType = {
-      subjectCombination : [],
-      college : collegeValue,
-      department : departmentValue,
-      faculty : facultyValue
+  
+     const {showToast} = useStatusToast()
+
+  const UserRetrievalFunc = async()=> {
+    await supabase?.auth?.getUser()
+    .then((response)=> {
+      if(response?.data?.user){
+        setUserAuthInfo(response?.data?.user?.user_metadata as unknown as usermetadata)
+      }
+    }).catch((error)=> {
+     showToast({
+      kind : "error",
+      title : "User Info Retrieval Error",
+      message : "The System Failed to retrieve your user Information"
+    })
+    route?.replace("/signin")
+    })
+  
   }
 
-   const payload : StoredUser = {
-    id : String(user?.id ?? "") ,
-    name : String(user?.name ?? "").trim(),
-   age: Number(user?.age),
-      username: String(user?.username ?? "").trim(),
-      email: String(user?.email?? "").trim(),
-      phone: String(user?.phone ?? "").trim(),
-      password: String(user ?? ""),
-      pendingOtp :null,
-      emailVerified : Boolean(user?.emailVerified),
-      createdAt : Number(user?.createdAt),
-      userProfile: String(user?.userProfile ?? "")?.trim(),
-     accountVerification: account_complete_verification,
-    };
-    // CLEARING OF STATES
+  useEffect(()=> {
+     async function RetrievalFromSupabase(){
+      await UserRetrievalFunc()
+     }
+     RetrievalFromSupabase();
+  },[])
+
+  const accountCompletionFunc  = ()=> {
+ // CLEARING OF STATES
      setAccountCompletionState(false)
        setAccountCompleteSuccess(true)
        setDepartmentValue("")
        setCollegeValue("");
        setFacultyValue("")
-  return mockDb?.update(user?.id || "", payload)
 }
-const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.college
+
+
+
+const checkAspirantMetaData : boolean 
+= userAuthInfo?.account_verification
+ && Object.keys(userAuthInfo?.account_verification).length === 0 ? true : false;
+
+
   // const handleAccountCompletion = ()=> {
     
   // }
   return (
     <div className={`h-full relative  bg-paper-soft dark:bg-ink-soft
-     ${accountCompletionState === false && accountCompleteSuccess === false ? "px-6 py-10 md:px-12 md:py-14" : ""} `}>
+     ${accountCompletionState === false && accountCompleteSuccess === false ? "w-full px-5 py-10 md:w-full " : ""} `}>
+   
       {/* ADDING OF COMPONENTS THAT ARE IN  ABSOLUTE STATE */}
-      {accountCompletionState &&
+      {checkAspirantMetaData &&
        <InitialSetUp Header={"Account Completion Required"} 
-      text={"Your data is collected to personalize and customize the feature experience for you."} 
-      userProfile={"aspirant"}
+      text={`Your data is collected to personalize and customize the feature experience for you.`} 
       buttonText="Submit"
-      buttonClick={()=>{
+      setInitialSetUpState={()=>{
         accountCompletionFunc();
       }}
       />}
@@ -114,37 +138,64 @@ const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.
          }
        {/* ADDING OF COMPONENTS THAT ARE IN  ABSOLUTE STATE */}
       <motion.div
+      
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex flex-col gap-3 border-b
          border-paper-line pb-8 dark:border-ink-line 
-         sm:flex-row sm:items-center sm:justify-between"
+         sm:items-center sm:justify-between"
       >
-        <div>
-          <h1 className="font-display text-[26px] leading-tight sm:text-[30px]">
-            Welcome back, {user?.name?.split(" ")[0] ?? "there"}.
+        <div className="flex justify-between gap-5">
+        <div className="flex justify-start w-full">
+          <h1 className="font-display text-[26px] text-start uppercase leading-tight sm:text-[30px]">
+            Welcome back, {userAuthInfo?.username  ?  userAuthInfo?.username :  "Hi there"} 👋.
           </h1>
-          <p className="mt-1.5 text-[14px] text-current/60">
-            Here&rsquo;s where your JAMB prep stands today.
-          </p>
+          
         </div>
 
-        {countdown ? (
-          <div className="rounded-sm border w-1/2 flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
-            <div className="text-[11px] uppercase tracking-wide text-current/45">
-              Countdown to JAMB
-            </div>
-            <div className="font-display text-[20px] text-gold-600 dark:text-gold-300">
+
+
+
+
+        <Link href="/dashboard/aspirant/profile" className="border border-gold-300 w-[50px] h-10 rounded-full">
+          <User className="h-10 w-10 p-3 text-ink"/>
+          </Link>
+          </div>
+       
+        
+       
+      {countdown ? (
+          <div className="rounded-md border lg:w-1/2 justify-end w-full  flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
+            <p className="text-[11px] text-start uppercase tracking-wide text-current/45">
+              JAMB COUNTDOWN
+            </p>
+            <p className="font-display text-[20px] text-start text-gold-600 dark:text-gold-300">
               {countdown.days}d {countdown.hours}h
-            </div>
+            </p>
           </div>
         ) : null}
+      
+  
       </motion.div>
       
-  {account_completion_info === undefined   && <SettingUpAccount/>}
+  {  checkAspirantMetaData && (
+   <SettingUpAccount affirm_account_verification={true}/>
+   )   }
 {/* ==============\\\\\\\\\\\\\================== */}
-  <Analysis/>
+     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <PerformanceAnalysis
+        preview={preview}
+        loading={loading}
+        error={error}
+      />
+
+      <LeaderboardPreview
+        preview={preview}
+        loading={loading}
+        error={error}
+      />
+    </div>
 
       <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
         <motion.div
@@ -176,7 +227,7 @@ const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.
           </Link>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.18 }}
@@ -206,7 +257,8 @@ const account_completion_info = mockApi?.getCurrentUser()?.accountVerification?.
               </li>
             ))}
           </ul>
-        </motion.div>
+        </motion.div> */}
+    
       </div>
       </div>
 

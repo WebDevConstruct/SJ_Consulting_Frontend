@@ -128,3 +128,34 @@ API responses later means changing the data source, not the components.
 
 Next.js 16 (App Router) · TypeScript · Tailwind CSS v3 · `framer-motion` ·
 `lucide-react`
+
+startCbtSession()
+    ↓
+New Peer session + saved questions
+status: awaiting_participants
+    ↓
+createPeerInvite()
+    ↓
+User B accepts
+status: ready
+    ↓
+Host calls startPeerSession()
+status: running
+shared deadline set
+    ↓
+Both users load the same session
+    ↓
+Both runners display the questions
+
+User A creates session → awaiting_participants
+User B accepts         → ready
+User A continues       → timing modal
+User A clicks Start    → running + shared deadline
+                            ↓
+             Host loads questions and opens runner
+                            ↓
+             User B receives running update
+                            ↓
+             User B loads questions and opens runner
+                            ↓
+             Each user answers and submits separately

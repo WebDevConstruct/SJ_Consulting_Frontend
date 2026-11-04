@@ -2,8 +2,12 @@
 
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/components/theme/theme-provider";
-import { useSession } from "@/lib/auth/use-session";
+import { createClient} from "@lib/supabase/client";
+import  { useGlobalContext} from "../../../../../../Context"
+import {useRouter} from "next/navigation";
+import { type usermetadata } from "@/types/UserTypes"
 
+const supabase = createClient()
 function SettingRow({
   label,
   description,
@@ -13,6 +17,8 @@ function SettingRow({
   description: string;
   action: React.ReactNode;
 }) {
+
+  
   return (
     <div className="flex items-center justify-between gap-6 border-b border-paper-line py-5 last:border-b-0 dark:border-ink-line">
       <div>
@@ -26,7 +32,16 @@ function SettingRow({
 
 export default function UndergraduateProfilePage() {
   const { theme, toggleTheme } = useTheme();
-  const { user, logout } = useSession();
+  const router = useRouter();
+const {userAuthInfo, setUserAuthInfo} = useGlobalContext()
+  /////========================LOGOUT F8UNCTIONALITY ==================\\
+     const handleSignOut = async () => {
+      await supabase.auth.signOut({ scope: "local" });
+      setUserAuthInfo({} as usermetadata)
+      router.replace("/signin");
+      router.refresh();
+    };
+  
   const isDark = theme === "dark";
 
   return (
@@ -36,7 +51,7 @@ export default function UndergraduateProfilePage() {
         Profile settings
       </h1>
       <p className="mt-2 max-w-md text-[14.5px] text-current/60">
-        Signed in as {user?.name} (@{user?.username}).
+        Signed in as {userAuthInfo?.username || "User"} (@{userAuthInfo?.username}).
       </p>
 
       <div className="mt-8 max-w-xl rounded-sm border border-paper-line bg-paper-soft px-6 dark:border-ink-line dark:bg-ink-surface">
@@ -84,7 +99,7 @@ export default function UndergraduateProfilePage() {
 
       <button
         type="button"
-        onClick={logout}
+        onClick={handleSignOut}
         className="focus-gold mt-8 flex items-center gap-2.5 rounded-sm border border-paper-line px-5 py-2.5 text-[13.5px] font-medium text-current/70 transition-colors hover:border-red-400/50 hover:text-red-600 dark:border-ink-line dark:hover:text-red-300"
       >
         <LogOut className="h-4 w-4" strokeWidth={1.7} />
