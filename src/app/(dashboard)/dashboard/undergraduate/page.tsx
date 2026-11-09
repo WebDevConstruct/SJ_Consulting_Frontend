@@ -134,20 +134,14 @@ export default function UndergraduateDashboardPage() {
        
       <div className="flex justify-end items-center w-full ">
       
-          {/* <div className="rounded-md border lg:w-1/3 justify-center w-full
+        <div className="rounded-md border lg:w-1/2  h-full justify-center w-full
             flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
 
-            <p className="text-[11px] text-start uppercase tracking-wide text-current/45">
-              ACADEMIC SESSION AS BEGUN
-            </p>
-            <p className="font-display text-[20px] text-start text-gold-600 dark:text-gold-300">
-                  PLAY GAMES WITH FRIENDS
-            </p>
-          </div> */}
             <UndergraduateExamCountdown
   examDate={examSchedule?.exam_date ?? ""}
   examLabel={examSchedule?.exam_label ?? "Exam"}
 />
+          </div>
           </div>
      
       

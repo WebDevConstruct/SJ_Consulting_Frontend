@@ -62,10 +62,11 @@ export function UndergraduateExamCountdown({
   return (
     <section
       aria-label={`${examLabel} countdown`}
-      className="sticky top-0 z-40 border-b border-gold-300/60 bg-gold-metal-soft/95 backdrop-blur dark:border-gold-600/40 dark:bg-ink/95"
+      className=" border-b z-0 border-gold-300/60 w-full 
+       bg-gold-metal-soft/40 backdrop-blur dark:border-gold-600/40 dark:bg-ink/95"
     >
-      <div className="mx-auto flex max-w-content flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2.5 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gold-700 dark:text-gold-200">
+      <div className="flex w-full lg:flex-row flex-col items-end justify-center lg:items-center lg:justify-end gap-x-4 gap-y-1 px-4 py-2.5 sm:px-6">
+        <p className="lg:text-[11px] text-[7px] font-bold uppercase tracking-[0.18em] text-gold-700 dark:text-gold-200">
           {time.isExpired
             ? `${examLabel} day`
             : `${time.days} days to ${examLabel}`}

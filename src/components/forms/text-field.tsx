@@ -30,8 +30,8 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
           value={value}
           id={inputId}
           className={`focus-gold rounded-sm border
-          border-paper-line bg-paper 
-             px-4 py-3 text-[14.5px] text-current placeholder:text-current/35
+          border-paper-line bg-paper text-[16px]
+             px-4 py-3 text-current placeholder:text-current/35
               dark:border-ink-line dark:bg-ink-surface ${className}`}
           {...props}
         />
