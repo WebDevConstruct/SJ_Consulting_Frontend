@@ -4,15 +4,22 @@ import {createClient} from "@lib/supabase/client";
 import {redirect} from "next/navigation";
 import {useEffect, useState} from "react";
 import type {UserInfo} from "@/types/UserTypes";
-import {useRouter} from "next/navigation"
+import {useRouter} from "next/navigation";
+import {usePathname} from "next/navigation";
 export default  function DashboardIndexPage() {
 // const [authUserState, setAuthUserState] = useState<UserInfo>({} as UserInfo)
 const supabase = createClient()
 const router = useRouter();
+const pathname = usePathname();
+
 const currentUser = async()=> {
   const authUser = await supabase.auth.getUser();
   if(authUser?.data){
    router?.replace(`/dashboard/${authUser?.data?.user?.user_metadata?.user_type}`);
+  }
+  if(authUser?.data && pathname?.length && (pathname?.includes("aspirant") || pathname?.includes("undergraduate")) &&
+     pathname !== `/dashboard/${authUser?.data?.user?.user_metadata?.user_type}`){
+   router?.replace("/signin")
   }
    
 }

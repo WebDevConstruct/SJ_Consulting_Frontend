@@ -8,6 +8,7 @@ import {useRouter} from "next/navigation";
 import {createClient} from "@lib/supabase/client";
 import { useGlobalContext} from "../../../Context";
 import { type usermetadata} from "@/types/UserTypes";
+import { useStatusToast } from "@components/ui/status-toast"
 
 interface DashboardShellProps {
   navItems: DashboardNavItem[];
@@ -20,6 +21,7 @@ const supabase = createClient()
 export function DashboardShell({ navItems, children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const {showToast} = useStatusToast()
   const {  userAuthInfo, setUserAuthInfo} = useGlobalContext()
 
   const isActive = (href: string) =>
@@ -59,11 +61,21 @@ export function DashboardShell({ navItems, children }: DashboardShellProps) {
             const active = isActive(item.href);
             return (
               <Link
+              onClick={()=>{
+                if(item.label === "Accommodation"){
+                showToast({
+                  kind : "info",
+                  title : "Coming Soon",
+                  message : "Accomodation for undergraduates is coming soon",
+             
+                })
+              }
+              }}
                 key={item.href}
-                href={item.href}
+                href={item?.href }
                 className={`focus-gold flex items-center gap-3 rounded-sm px-3 
                   py-2.5 text-[14px] font-medium transition-colors ${
-                  active
+                  active && item?.label !== "Accommodation"
                     ? "bg-gold-400/10 text-gold-600 dark:text-gold-300"
                     : "text-current/65 hover:bg-current/5 hover:text-current"
                 }`}

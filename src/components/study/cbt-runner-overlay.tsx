@@ -16,6 +16,7 @@ import  SessionResultPopUp  from "../SessionResultPopUp";
 import {useGlobalContext} from "../../../Context"
 
 interface CbtRunnerOverlayProps {
+  profile  : "aspirant" | "undergraduate";
   open: boolean;
   session: StartedSession | null;
   onExit?: () => void;
@@ -71,6 +72,7 @@ function formatTime(totalSeconds: number) {
 }
 
 export function CbtRunnerOverlay({
+  profile,
   open,
   session,
   onExit,
@@ -84,7 +86,7 @@ const [sessionStatus, setSessionStatus] = useState<"running" | "completed" | "pe
     () => session?.questions ?? [],
     [session],
   );
-  const { setNotification} = useGlobalContext()
+  const { setNotification, setActiveSession} = useGlobalContext()
 const { notification, showResultForSession} = useSessionResultPopUp(supabase, userId)
   const [index, setIndex] = useState(0);
   const {showToast} = useStatusToast()
@@ -352,7 +354,7 @@ window.location.reload()
         session_id: "",
       kind: "solo",
       mode: "exam",
-      track_type: "subject",
+      track_type:  profile === "aspirant" ?  "subject" : "courses",
       submit_deadline : "",
       subjectId : "",
       question_count: 0,
@@ -364,7 +366,7 @@ window.location.reload()
         session_id: "",
       kind: "peer",
       mode: "exam",
-      track_type: "subject",
+      track_type:    profile === "aspirant" ?  "subject" : "courses",
       submit_deadline : "",
       subjectId : "",
       question_count: 0,
@@ -372,6 +374,18 @@ window.location.reload()
       questions: [],
       status : "pending"
     } )
+    setActiveSession({ 
+        session_id: "",
+      kind: "peer",
+      mode: "exam",
+      track_type:  profile === "aspirant" ?  "subject" : "courses",
+      submit_deadline : "",
+      subjectId : "",
+      question_count: 0,
+      duration_seconds: 0,
+      questions: [],
+      status : "pending"
+    })
   }
  if (result) {
   const reviewAnswers = result.answers ?? [];
@@ -640,7 +654,7 @@ window.location.reload()
           aria-label="Exit session"
           className="focus-gold flex h-9 w-9 items-center justify-center rounded-full text-current/50 hover:text-current"
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" onClick={onExit} />
         </button>
 
         <div className="text-[13.5px] font-medium text-current/70">

@@ -77,7 +77,7 @@ try {
       showToast({
         kind : "error",
         title : "Error Signing Up",
-        message : "An error occurred while creating your account.",
+        message :  error.message || "An Unexpected error has occured.",
         statusCode : 500
       })
       return;

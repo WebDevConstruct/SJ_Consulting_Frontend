@@ -14,7 +14,7 @@ const UndergraduateCBTPage = () => {
   const { showToast } = useStatusToast();
 
   const handleStudyCourse = (course: StudentCourse) => {
-    router.push(`/dashboard/undergraduate/cbt/${course.id}/study`);
+    router.push(`/dashboard/undergraduate/study/cbt/${course.id}/study`);
   };
 
   const handleBuyCourse = async (course: StudentCourse) => {

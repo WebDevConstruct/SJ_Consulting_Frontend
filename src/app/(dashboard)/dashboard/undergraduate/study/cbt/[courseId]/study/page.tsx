@@ -8,7 +8,7 @@ import { Book, Lock, Network, User, Users } from "lucide-react";
 
 import { Button } from "@components/Button";
 import { useStatusToast } from "@/components/ui/status-toast";
-import { useGlobalContext } from "../../../../../../../../Context";
+import { useGlobalContext } from "../../../../../../../../../Context";
 import {  SoloModeModal, InvitePeerOverlay, SoloTrackModal, TimingHeadsUpModal, CbtRunnerOverlay, PendingPeerInvites}
  from "@/components/study";
 import   { type usermetadata} from "@/types/UserTypes";
@@ -30,8 +30,8 @@ const StudyCoursePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const router = useRouter();
   const { showToast } = useStatusToast();
-  const [activeSession, setActiveSession] = useState<StartedSession | null>()
-  const { acceptedSession, 
+ 
+  const { acceptedSession,  activeSession, setActiveSession,
     setAcceptedSession, course, setCourse, recipientSession, setRecipientSession, setNotification} = useGlobalContext();
     const [starting, setStarting] = useState(false)
     const [runnerOpen, setRunnerOpen] = useState(false);
@@ -184,70 +184,7 @@ const StudyCoursePage = () => {
     };
   }, [supabase, userIdTransfer, runnerOpen]);
 
-  const startSession = async (kind: "solo" | "peer" | "multiplayer") => {
-    try {
-//   const {data : coursesQuestions, 
-//     error : coursesQuestionsError} = await supabase.from("questions_courses")
-//   .select("id, course_id, question_text, options, explanation, subquestions")
-//   .eq("course_id",  courseId)
 
-//   if(coursesQuestionsError){
-//     showToast({
-//         kind : "error",
-//         title : "Course Questions Error",
-//         message : coursesQuestionsError.message || "Error fetching course questions"
-//     })
-//   }
-//   if(coursesQuestions){
-//     showToast({
-//         kind : "success",
-//         title : "Questions Available",
-//         message : "Let's start your CBT session now."
-//     })
-//   }
-
-
-
-      const response = await fetch(`/api/student/cbt/session`, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          kind,
-          course_id: courseId,
-          mode: kind === "peer" ? "exam" : "practice",
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Unable to start this session.");
-      }
-if(response.ok){
-      showToast({
-        kind: "success",
-        title: kind === "solo" ? "Solo session ready" : "Peer session created",
-        message:
-          kind === "solo"
-            ? "Your CBT session is ready."
-            : "Invite a coursemate to join your session.",
-      });
-
-    }
-    } catch (error) {
-      showToast({
-        kind: "error",
-        title: "Session error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unable to start this session.",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -279,7 +216,13 @@ if(response.ok){
   
   
     const closeAll = () => setModal("none");
-   const closeSoloTrack = ()=> setModal("timing")
+   const closeSoloTrack = (session: (StartedSession & {status : string}) | null)=> {
+       if(session?.session_id){
+    setModal("timing")
+       }else{
+        setModal("none");
+       }
+      }
     // const handleStudyContinue = (slug: string) => {
     //   closeAll();
     //   router.push(`/dashboard/aspirant/study/materials/${slug}`);
@@ -287,39 +230,7 @@ if(response.ok){
   
     const handleChooseSolo = () => setModal("solo-mode");
   //hnadling the pick of a TRACK, EITHER RACTICE OR  
-  const handleSoloTrackSelected = async ({mode} : {mode ?: "exam" | "practice"}) => {
-    setStarting(true);
-  //alert("You found me he he he")
-    try {
-      const session = await startCbtSession(supabase, {
-        kind: "solo",
-        mode: mode || "practice",
-        trackType: "courses",
-      
-        courseId : courseId || null,
-      //  topicId: selection.topicId || "",
-    
-        questionCount: 30,
-      });
-   //   console.log(session)
   
-      setActiveSession(session);
-     // setModal("timing");
-      console.log(modal);
-  
-     // setRunnerMode("practice");
-      
-    } catch (error) {
-    //  console.error(error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Could not prepare this CBT session.",
-      );
-    } finally {
-      setStarting(false);
-    }
-  };
   
     //HANDLE SOLO PICK 
     const handleChoosePeer = () => {
@@ -365,7 +276,7 @@ if(response.ok){
   
       setActiveSession({
         session_id: started.session_id,
-    
+         status : "ready",
         kind: "solo",
         subjectId : started?.subjectId,
         mode: started.mode,
@@ -469,7 +380,9 @@ if(response.ok){
      })
    
     
-  };
+  }finally{
+  closeAll()
+  }
   }
     const handleRunnerFinish = (result: SubmissionResult) => {
       setLastResult(result);
@@ -502,7 +415,7 @@ if(response.ok){
     };
   
 
-console.log(userIdTransfer);
+//console.log(userIdTransfer);
 
 
 
@@ -661,6 +574,7 @@ console.log(userIdTransfer);
                   />
             
                <CbtRunnerOverlay
+               profile = {"undergraduate"}
               open={runnerOpen}
               session={activeSession && activeSession.session_id?.length > 1 ? activeSession : 
                 acceptedSession?.status === "running" && acceptedSession?.kind === "peer" ? acceptedSession :
@@ -692,7 +606,7 @@ console.log(userIdTransfer);
               subjects={[]}
               topics={[]}
               combinations={[]}
-              onStart={handleSoloTrackSelected}
+            //  onStart={handleSoloTrackSelected}
             />
             <PendingPeerInvites
               userId = {userIdTransfer}

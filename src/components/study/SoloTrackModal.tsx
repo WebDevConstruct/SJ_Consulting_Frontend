@@ -6,7 +6,13 @@ import { ModalShell } from "@/components/study/modal-shell";
 import type { CbtTrack,  } from "@/lib/study/types";
 import { useGlobalContext } from "../../../Context";
 import { Book } from "lucide-react";
-
+import { useStatusToast } from "@/components/ui/status-toast";
+import { startCbtSession } from "@/lib/study/cbt-api"
+import { TextField} from "@/components/forms/text-field";
+import {createClient } from "@lib/supabase/client";
+import {useParams} from "next/navigation";
+import {StartedSession} from "@lib/study/cbt-api";
+const supabase = createClient()
 export type SubjectOption = {
   id: string;
   name: string;
@@ -26,20 +32,21 @@ export type CombinationOption = {
 interface SoloTrackModalProps {
   profile : "undergraduate" | "aspirant"
   open: boolean;
-  onClose: () => void;
+  onClose: (session : (StartedSession & {status : string}) | null) => void;
   subjects: SubjectOption[];
   topics: TopicOption[];
   combinations: CombinationOption[];
-  onStart: (selection: {
-    trackType: CbtTrack;
-    subjectId?: string | null;
-    courseId ?: string | null;
-    topicId?: string | null;
-    subjectIds?: string[] | null;
-    mode  : "exam" | "practice";
-    questionCount : number
+  // onStart: (selection: {
+  //   trackType: CbtTrack;
+  //   subjectId : string | null;
+  //   courseId ?: string | null;
+  //   topicId?: string | null;
+  //   subjectIds?: string[] | null;
+  //   durationSeconds : number;
+  //   mode  : "exam" | "practice";
+  //   questionCount : number
 
-  }) => void | Promise<void>;
+  // }) => void | Promise<void>;
 }
 
 export function SoloTrackModal({
@@ -49,9 +56,11 @@ onClose,
   subjects,
   topics,
   combinations,
-  onStart,
+  //onStart,
   
 }: SoloTrackModalProps) {
+   const { courseId } = useParams<{ courseId: string }>();
+   const { setActiveSession} = useGlobalContext()
   const [trackType, setTrackType] = useState<CbtTrack>("subject");
   const [subjectId, setSubjectId] = useState<string | null>(null);
   const [topicId, setTopicId] = useState<string | null>(null);
@@ -59,7 +68,9 @@ onClose,
   const [starting, setStarting] = useState(false);
   const [mode, setMode] = useState<"exam" | "practice">("practice");
   const [questionCount, setQuestionCount] = useState<number>(30);
-  const {courseId, setCourseId} = useGlobalContext();
+ // const {courseId, setCourseId} = useGlobalContext();
+  const {showToast} = useStatusToast();
+  const [durationSeconds, setDurationSeconds] = useState<number>(0)
  // const [mode, setMode] = useState<"exam" | "practice">("practice")
  const clear = ()=> {
     if (!open) {
@@ -70,9 +81,12 @@ onClose,
       setStarting(false);
     }
  }
+
   useEffect(() => {
     function runClear(){
       clear();
+      setQuestionCount(10);
+      setDurationSeconds(15)
     }
     runClear();
   }, [open]);
@@ -94,36 +108,58 @@ onClose,
         ? Boolean(subjectId && topicId)
         : Boolean(selectedCombination) : "courses";
 
+
+
   const handleContinue = async () => {
+  //alert("RUNNING")
     if (starting) return;
 
     setStarting(true);
-
+//console.log(questionCount, durationSeconds, mode, trackType, subjectId, topicId, combinationLabel)
     try {
-      await onStart({
-        trackType,
-        subjectId:  subjectId || null,
+    const session = await startCbtSession(supabase, {
+        kind: "solo",
+        mode: mode,
+        trackType: profile === "aspirant" ? trackType : "courses",
+        durationSeconds : durationSeconds * 60,
         courseId : courseId || null,
-     
-      //   topicId: trackType === "topic" ? topicId : null,
-        subjectIds: null,
-        mode : mode,
-        questionCount,
+        questionCount : questionCount || 30,
       });
-    } finally {
-
-      setStarting(false);
-      onClose()
-    }
+    
+      if(session){
+          setActiveSession(session as unknown as StartedSession & { status: string });
+        showToast({
+          kind : "success",
+          title : "Session Started",
+          message : "Your CBT session has started successfully."
+        })
+         onClose(session as StartedSession & {status : string})
+      }
+    }catch(error){
+       showToast({
+    kind : "error",
+    title : "Error Starting Session",
+    message :   error instanceof Error
+        ? error.message :
+         ""
+  })
+    onClose(null)
+    } 
   };
 
+console.log("MODE", mode)
+  const QUESTION_COUNTS = [10, 20, 30, 40, 50, 60, 70];
   return (
 
     <ModalShell
       open={open}
-      onClose={onClose}
+      onClose={()=> {
+        onClose(null)
+      }}
       title="Choose your CBT track"
-      description="Select whether you want to practise by subject, topic, or your subject combination."
+      description={profile === "aspirant" ? "Select whether you want to practise by subject, topic, or your subject combination."
+        : "Select whether you want to practise in practice mode or exam mode."}
+      
     >
       {profile === "aspirant" ? (
         <div>
@@ -237,16 +273,17 @@ onClose,
       </button>
       </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 no-scrollbar">
            <div className={`flex justify-between
              bg-paper-soft dark:bg-ink-soft items-center gap-4 px-4 py-4`}>
            
                 <div onClick={()=> {
-                  setMode("practice")
-                  alert(mode);
+                  setMode("practice");
+                  //alert(mode);
                 }} 
-                className={`flex p-5 border border-gold-500 w-1/2 cursor-pointer hover:bg-gold-200 justify-center items-center
-                 bg-paper-surface dark:bg-ink-surface rounded-md ${mode === "practice" ? "bg-gold-300" : ""}`}>
+                className={`flex py-5 px-2 border border-gold-500 w-1/2 gap-2 lg:dark:hover:dark:bg-gold-700
+                   cursor-pointer lg:hover:bg-gold-700 lg:hover:bg-opacity-20 justify-center items-center
+                 rounded-md ${mode === "practice" ? "bg-gold-400" : "bg-paper-surface dark:bg-ink-surface"}`}>
                 
                <Book/>
                <p className="text-[14px] 
@@ -256,27 +293,66 @@ onClose,
                 </div>
 
                  <div onClick={()=> setMode("exam")}
-                 className={`flex p-5 border w-1/2 cursor-pointer hover:bg-gold-200
-                  justify-center items-center
-                  border-gold-500 rounded-md bg-paper-surface dark:bg-ink-surface
-                   ${mode === "exam" ? "bg-gold-300" : ""}`}>
+                 className={`flex px-2 py-5 border w-1/2 cursor-pointer  lg:hover:dark:bg-gold-700 lg:hover:bg-opacity-20 lg:hover:bg-gold-700
+                  justify-center items-center gap-2 border-gold-500 rounded-md 
+                   ${mode === "exam" ? "bg-gold-400" : "bg-paper-surface dark:bg-ink-surface "}`}>
                <Book/>
                <p className="text-[14px] 
                font-medium text-current/80 dark:text-paper">
                 Exam Mode
                </p>
                 </div>
-                 <div className="mt-5 flex flex-col gap-2">
-  <span className="text-[13.5px] font-medium text-current/80">
-    Duration
-  </span>
-
-</div>
+                
     
       <div>
         </div>
 
            </div>
+
+           {/* QUESTION COUNT */}
+                   <section>
+          <div className="mb-2 text-[12.5px] font-medium text-current/60">
+            Number of questions
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            {QUESTION_COUNTS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => setQuestionCount(count)}
+                className={`focus-gold rounded-sm border px-3 py-2.5 text-[13px] transition-colors ${
+                  questionCount === count
+                    ? "border-gold-400/70 bg-gold-400/5 font-medium"
+                    : "border-paper-line hover:border-gold-400/50 dark:border-ink-line"
+                }`}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* DURATION OF THE SESSION */}
+              <div className="mt-5 flex flex-col gap-2">
+  <span className="text-[13.5px] font-medium text-current/80">
+    Duration
+  </span>
+
+  <select
+    value={durationSeconds}
+    onChange={(event) =>
+      setDurationSeconds(Number(event.target.value))
+    }
+    className="focus-gold rounded-sm border border-paper-line bg-paper px-4 py-3 text-base text-current dark:border-ink-line dark:bg-ink-surface md:text-[14.5px]"
+  >
+    {[15, 30, 45, 60].map((minutes) => (
+      <option key={minutes} value={minutes}>
+        {minutes} minutes
+      </option>
+    ))}
+  </select>
+</div>
            <button
         type="button"
         disabled={!canContinue || starting}

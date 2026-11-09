@@ -36,8 +36,8 @@ if(responseError){
    showToast({
       kind : "error",
       title : "Error Signing In",
-      message : "An error occurred while signing in.",
-      statusCode : Number(responseError.code) 
+      message :  responseError.message || "An Unexpected error has occured.",
+     // statusCode : Number(responseError.code) 
     })
 // console.log("SignInError", {
 //   name : error?.name,
@@ -60,8 +60,8 @@ if(data.user){
   showToast({
       kind : "error",
       title : "Error Signing In",
-      message : "Error Signing in. Please check your credentials and try again.",
-      statusCode : 500 
+      message : "An Unexpected error has occured.",
+    
     })
 
   }

@@ -146,19 +146,14 @@ const checkAspirantMetaData : boolean
          border-paper-line pb-8 dark:border-ink-line 
          sm:items-center sm:justify-between"
       >
-        <div className="flex justify-between gap-5 items-center">
-        <div className="flex justify-start w-full">
+        <div className="flex justify-between w-full gap-5 items-center">
+       
           <h1 className="font-display text-[26px] text-start uppercase leading-tight sm:text-[30px]">
             Welcome back, {userAuthInfo?.username  ?  userAuthInfo?.username :  "Hi there"} 👋.
           </h1>
-          
-        </div>
-
-
-
-
-
-        <Link href="/dashboard/aspirant/profile"  className="border border-gold-300 dark:bg-ink-soft 
+           
+    
+ <Link href="/dashboard/aspirant/profile"  className="border border-gold-300 dark:bg-ink-soft 
   d w-[50px] h-10 rounded-full bg-paper-soft">
           <User className="h-10 w-10 p-3 text-ink dark:text-paper-surface"/>
           </Link>
@@ -167,13 +162,15 @@ const checkAspirantMetaData : boolean
         
        
       {countdown ? (
-          <div className="rounded-md border lg:w-1/2 justify-end w-full  flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
+        <div className="flex justify-end items-center w-full">
+          <div className="rounded-md border lg:w-1/3 justify-end w-full  flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
             <p className="text-[11px] text-start uppercase tracking-wide text-current/45">
               JAMB COUNTDOWN
             </p>
             <p className="font-display text-[20px] text-start text-gold-600 dark:text-gold-300">
               {countdown.days}d {countdown.hours}h
             </p>
+          </div>
           </div>
         ) : null}
       
@@ -199,7 +196,7 @@ const checkAspirantMetaData : boolean
     </div>
 
       <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
@@ -226,7 +223,7 @@ const checkAspirantMetaData : boolean
           >
             Practice questions now
           </Link>
-        </motion.div>
+        </motion.div> */}
 
         {/* <motion.div
           initial={{ opacity: 0, y: 16 }}

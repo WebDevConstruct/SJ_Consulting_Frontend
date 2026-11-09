@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import {ModalShell} from "./modal-shell";
 import type { CbtMode, CbtTrack } from "@lib/study/types";
-import { FaBookOpenReader } from "react-icons/fa6";
-import { useGlobalContext } from "../../../Context"
+import { useGlobalContext } from "../../../Context";
+import { useStatusToast} from "@components/ui/status-toast";
 interface SubjectOption {
   id: string;
   name: string;
@@ -50,6 +50,7 @@ export default function SoloModeModal({
   topics,
   onPick,
 }: SoloModeModalProps) {
+  const { showToast } = useStatusToast()
   const [trackType, setTrackType] = useState<CbtTrack>("subject");
   const [subjectId, setSubjectId] = useState<string | null>(null);
   const [topicId, setTopicId] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export default function SoloModeModal({
 
   const handleContinue = async () => {
   if (!canContinue || starting) return;
-  alert("Starting a session")
+ // alert("Starting a session")
   try {
      setStarting(true);
  await onPick({
@@ -103,8 +104,16 @@ export default function SoloModeModal({
       questionCount,
     });
     
+  }catch(error){
+  showToast({
+    kind : "error",
+    title : "Error Starting Session",
+    message :   error instanceof Error
+        ? error.message :
+         ""
+  })
   } finally {
-    onClose()
+   // onClose()
    // setTrackType("")
   }
 };

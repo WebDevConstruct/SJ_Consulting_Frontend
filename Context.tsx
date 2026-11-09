@@ -41,6 +41,8 @@ type contextTypes = {
     setCourseId : React.Dispatch<React.SetStateAction<string>>,
     setCollegeValue : React.Dispatch<React.SetStateAction<string>>,
     departmentValue : string,
+    activeSession : StartedSession  & {status : string}| null,
+    setActiveSession : React.Dispatch<React.SetStateAction<StartedSession  & {status  : string}| null>>,
     setDepartmentValue : React.Dispatch<React.SetStateAction<string>>,
     acceptedSession ?: StartedSession & {status : string},
     setAcceptedSession : React.Dispatch<React.SetStateAction<StartedSession & {status : string}> >,
@@ -71,6 +73,18 @@ export const ContextProvider = ({children}: {children ?: React.ReactNode})=> {
     const [OtpValues, setOtpValues] = useState("");
     const [accountCompleteSuccess, setAccountCompleteSuccess] = useState(false);
     const [userAuthInfo, setUserAuthInfo] = useState<usermetadata | null>({} as usermetadata)
+     const [activeSession, setActiveSession] = useState<StartedSession & {status : string} | null>({ 
+        session_id: "",
+      kind: "peer",
+      mode: "exam",
+      track_type: "subject",
+      submit_deadline : "",
+      subjectId : "",
+      question_count: 0,
+      duration_seconds: 0,
+      questions: [],
+      status : "pending"
+    } )
     const [acceptedSession, setAcceptedSession] = useState<StartedSession & {status : string}>( { 
         session_id: "",
       kind: "peer",
@@ -132,7 +146,8 @@ useEffect(()=> {
         recipientSession, setRecipientSession,
         notification, setNotification,
         courseId, setCourseId,
-        userAuthInfo, setUserAuthInfo
+        userAuthInfo, setUserAuthInfo,
+        activeSession, setActiveSession
     }
     return (
         <contextTree.Provider value={hold}>

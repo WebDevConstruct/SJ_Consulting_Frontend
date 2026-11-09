@@ -32,6 +32,15 @@
     color: transparent;
   }
 
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
   .container-content {
     @apply mx-auto w-full max-w-content px-6 md:px-10;
   }

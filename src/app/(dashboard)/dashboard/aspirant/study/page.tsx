@@ -192,6 +192,7 @@ const handleSoloTrackSelected = async (selection: {
   setStarting(true);
 //alert("You found me he he he")
   try {
+    alert("RUNNING");
     const session = await startCbtSession(supabase, {
       kind: "solo",
       mode: runnerMode,
@@ -199,22 +200,32 @@ const handleSoloTrackSelected = async (selection: {
       subjectId: selection.subjectId ,
       topicId: selection.topicId,
       subjectIds: selection.subjectIds,
-      questionCount: 30,
+      questionCount: 60,
     });
  //   console.log(session)
-
+// if(!session){
+//    showToast({
+//     kind : "error",
+//     title : "Error Starting Session",
+//     message :  "An Error Occured While Starting the Session, Please Try Again"
+//   })
+// }
     setActiveSession(session);
+
    // setRunnerMode("practice");
     setModal("solo-track");
   } catch (error) {
   //  console.error(error);
-    alert(
-      error instanceof Error
-        ? error.message
-        : "Could not prepare this CBT session.",
-    );
+  showToast({
+    kind : "error",
+    title : "Error Starting Session",
+    message :   error instanceof Error
+        ? error.message :
+         ""
+  })
+   
   } finally {
-    setStarting(false);
+   // setStarting(false);
   }
 };
 
@@ -262,8 +273,7 @@ const handleSoloPick = async (params: {
 
     setActiveSession({
       session_id: started.session_id,
-  
-      kind: "solo",
+     kind: "solo",
       subjectId : started?.subjectId,
       mode: started.mode,
       track_type: started.track_type,
@@ -299,9 +309,8 @@ if(started){
 
 const handleStart = async () => {
  
- // if (!acceptedSession) return;
-  //console.log(activeSession)
-  //alert("I am running here too oooo")
+alert("RUNNING");
+  
   try {
     
     if (acceptedSession?.kind === "peer" && acceptedSession?.session_id?.length > 1) {
@@ -457,7 +466,7 @@ setRecipientSession( {
         open={modal === "solo-mode" && runnerMode === "practice"}
         onClose={()=> {
           setModal("none")
-          setRunnerOpen(true)
+        //  setRunnerOpen(true)
         }}
 
         subjects={subjects}
@@ -489,11 +498,17 @@ setRecipientSession( {
       />
 
    <CbtRunnerOverlay
+   profile={"aspirant"}
   open={runnerOpen}
   session={activeSession && activeSession.session_id?.length > 1 ? activeSession : 
     acceptedSession?.status === "running" && acceptedSession?.kind === "peer" ? acceptedSession :
      acceptedSession?.status !== "running" && recipientSession?.kind === "peer" && recipientSession?.status === "running" ? recipientSession : null  }
-  onExit={() => setRunnerOpen(false)}
+  onExit={() => {
+    setRunnerOpen(false);
+    setAcceptedSession({} as StartedSession & {status : string});
+    setRecipientSession({} as StartedSession & {status : string});
+    setRunnerMode("practice")
+  }}
   submitDeadline = {activeSession?.kind === "solo" ? activeSession.submit_deadline : 
     acceptedSession?.status === "running" && acceptedSession.kind === "peer" ? acceptedSession.submit_deadline :
      acceptedSession?.status !== "running" && recipientSession?.kind === "peer" && recipientSession?.status === "running" ? recipientSession?.submit_deadline : null  }
@@ -507,7 +522,7 @@ profile = "aspirant"
   subjects={subjects}
   topics={topics}
   combinations={combinations}
-  onStart={handleSoloTrackSelected}
+ // onStart={handleSoloTrackSelected}
 />
 <PendingPeerInvites
   userId = {userIdTransfer}

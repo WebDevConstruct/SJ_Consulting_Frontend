@@ -6,12 +6,8 @@ export type PeerInvite = {
   invited_by: string;
   invited_user_id: string;
   identifier: string;
-  status:
-    | "pending"
-    | "accepted"
-    | "declined"
-    | "expired"
-    | "cancelled";
+  inviter_identifier: string | null;
+  status: "pending" | "accepted" | "declined" | "expired" | "cancelled";
   expires_at: string;
 };
 

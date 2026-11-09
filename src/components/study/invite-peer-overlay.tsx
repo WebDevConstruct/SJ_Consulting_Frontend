@@ -53,7 +53,7 @@ export function InvitePeerOverlay({
   
 const supabase = createClient();
 const {showToast} = useStatusToast();
-const {acceptedSession, setAcceptedSession, recipientSession,
+const {acceptedSession, setAcceptedSession, recipientSession, setRecipientSession,
    course, setCourse, courseId} = useGlobalContext();
 //const [userStatus, setUserStatus] = useState<usermetadata>()
 const [sessionId, setSessionId] = useState<string | null>(null);
@@ -67,7 +67,8 @@ const [error, setError] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<string[]>([])
   const [subject, setSubject] = useState<string>(subjects?.length ? subjects[0] : "");
   const [sending, setSending] = useState(false);
-
+const QUESTION_COUNTS = [10, 20, 30, 40, 50, 60, 70];
+const [questionCount, setQuestionCount] = useState<number>(QUESTION_COUNTS[2]);
   // When the overlay (re)opens, resume wherever the persisted session is.
   const inviteId = invite?.id ?? null;
 
@@ -85,7 +86,11 @@ const getUserSubjects = async()=> {
 }
 
 useEffect(()=> {
+
    async function promiseWrapper(){
+    //LEVERAGING THIS FUNCTION TO SET THE QUESTION COUNT STATE AND THE DURATION MINUTES
+      setQuestionCount(QUESTION_COUNTS[2]);
+  setDurationMinutes(15);
    await  getUserSubjects()
     }
     promiseWrapper()
@@ -239,27 +244,33 @@ useEffect(() => {
     window.removeEventListener("focus", handleFocus);
     void supabase.removeChannel(channel);
   };
+  
 }, [sessionId,  inviteId, open, supabase]);
 
   if (!open) return null;
 
  const handleSendRequest = async () => {
+ // alert("START RUNNING")
   setSending(true);
   setError(null);
-
-  try {
+try {
     const session = await startCbtSession(supabase, {
       kind: "peer",
       mode: "exam",
-      trackType: track,
+      trackType: profile === "aspirant" ? track: "courses",
       subjectId: profile === "aspirant" ? 
       (subject === "Financial Acounting" ? "accounting" : subject?.toLowerCase()) || "" : null,
       courseId : course?.id|| null,
-      questionCount: 30,
+      questionCount: questionCount || 30,
+      subjectIds : null,
       durationSeconds: durationMinutes * 60,
     });
 
-
+   showToast({
+      kind : "success",
+      title : "Peer Session",
+      message : "The peer session has been started successfully."
+    })
    setAcceptedSession({
   ...session,
   status : "pending",
@@ -275,17 +286,26 @@ useEffect(() => {
       identifier,
       15,
     );
-
+   if(createdInvite?.status === "pending"){
     setInvite(createdInvite);
     setStep("pending");
+    setSending(false);
+   }
   } catch (inviteError) {
     setError(
       inviteError instanceof Error
         ? inviteError.message
         : "Could not send the peer invitation.",
     );
+
+    showToast({
+      kind : "error",
+      title : "Peer Session Error",
+      message : inviteError instanceof Error ? inviteError?.message : "An unexpected error occurred while sending the peer invitation."
+    })
+    setSending(false)
   } finally {
-    setSending(false);
+   // setSending(false);
   }
 };
 
@@ -311,8 +331,8 @@ useEffect(() => {
 //HANDLE PROCEED ONCE THE OTHER PEER HAS ACCEPTED THE INVITE
 const handleProceed = () => {
   if (!sessionId || !invite) return;
-
-  onProceed({
+  try{
+   onProceed({
     ...acceptedSession,
     session_id : sessionId,
     kind : "peer",
@@ -323,7 +343,21 @@ const handleProceed = () => {
     duration_seconds : acceptedSession?.duration_seconds || 1800,
     questions : acceptedSession?.questions || [],
   });
-  setStep("invite");
+   setStep("invite");
+  showToast({
+    kind : "success",
+    title : "Peer Session",
+    message : "The peer session has been started successfully."
+  })
+   
+}catch(error){
+  showToast({
+    kind : "error",
+    title : "Peer Session Error",
+    message : `${error instanceof Error ? error.message : "An unexpected error occurred while starting the peer session."}`
+  })
+}
+
 };
 console.log(recipientSession)
 
@@ -355,7 +389,11 @@ console.log(recipientSession)
           aria-label="Close"
           className="focus-gold flex h-9 w-9 items-center justify-center rounded-full text-current/50 hover:text-current"
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" onClick={()=> {
+            setAcceptedSession({} as StartedSession & {status : string});
+            setRecipientSession({} as StartedSession & {status : string})
+          }}
+           />
         </button>
       </div>
 
@@ -484,6 +522,8 @@ console.log(recipientSession)
               </div>
               {/* TIMING */}
        <div className="mt-5 flex flex-col gap-2">
+       {/* QUESTION COUNT */}
+                        
   <span className="text-[13.5px] font-medium text-current/80">
     Duration
   </span>
@@ -527,12 +567,36 @@ console.log(recipientSession)
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
               className="w-full max-w-sm">
-                  <h2 className="text-[14px] font-bold leading-[20px] text-current/80 dark:text-white">
+                  <h2 className="text-[20px] uppercase font-bold leading-[30px] text-current/80 dark:text-white">
                     Invitation Details
                   </h2>
                   <div className="flex flex-col gap-3">
     <TextField label="Course"  value={course?.course_title || ""} readOnly/>
     {/* // This is used to set the session duration */}
+
+    {/* ;DURATTION */}
+      <section>
+          <div className="mb-2 text-[12.5px] font-medium text-current/60">
+            Number of questions
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            {QUESTION_COUNTS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => setQuestionCount(count)}
+                className={`focus-gold rounded-sm border px-3 py-2.5 text-[13px] transition-colors ${
+                  questionCount === count
+                    ? "border-gold-400/70 bg-gold-400/5 font-medium"
+                    : "border-paper-line hover:border-gold-400/50 dark:border-ink-line"
+                }`}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </section>
        <div className="mt-5 flex flex-col gap-2">
   <span className="text-[13.5px] font-medium text-current/80">
     Duration

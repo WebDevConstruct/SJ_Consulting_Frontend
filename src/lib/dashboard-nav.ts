@@ -1,3 +1,5 @@
+"use client"
+import { usePathname} from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -6,7 +8,10 @@ import {
   MessageCircle,
   ScrollText,
   User,
+  House
 } from "lucide-react";
+
+
 
 export interface DashboardNavItem {
   href: string;
@@ -42,12 +47,17 @@ export const undergraduateNavItems: DashboardNavItem[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
   },
-  { href: "/dashboard/undergraduate/gst", label: "GST", icon: BookMarked },
   {
-    href: "/dashboard/undergraduate/cbt",
-    label: "CBT Questions",
+    href: "/dashboard/undergraduate/study",
+    label: "Study",
     icon: ScrollText,
   },
+   {
+    href: "/dashboard/undergraduate/analysis",
+    label: "Analysis",
+    icon: BarChart3,
+  },
+   { href: "/dashboard/undergraduate", label: "Accommodation", icon: House },
   {
     href: "/dashboard/undergraduate/profile",
     label: "Profile",

@@ -14,7 +14,7 @@ import {SettingUpAccount} from "@components/SettingUpAccount";
 import {useDashboardPreview} from "../../../../hooks/use-dashboard-preview";
 import { LeaderboardPreview } from "@/components/dashboard/leaderboard-preview";
 import { PerformanceAnalysis } from "@/components/dashboard/performance-analysis";
-
+import {UndergraduateExamCountdown} from "@/components/dashboard/undergraduate-exam-countdown"
 export default function UndergraduateDashboardPage() {
   //const { user } = useSession();
   //const year = user?.undergraduate?.year ?? 1;
@@ -63,7 +63,10 @@ export default function UndergraduateDashboardPage() {
          setCollegeValue("");
          setFacultyValue("")
   }
-  
+  const examSchedule ={
+    exam_date : "2027-01-25T10:00:00Z",
+    exam_label : "First Semester Examination"
+  }
   
   
   const checkAspirantMetaData : boolean 
@@ -113,30 +116,38 @@ export default function UndergraduateDashboardPage() {
          border-paper-line pb-8 dark:border-ink-line 
          sm:items-center sm:justify-between"
       >
-        <div className="flex justify-between gap-5 items-center">
-        <div className="flex justify-start w-full">
+        <div className="flex w-full justify-between gap-5 items-center">
+      
           <h1 className="font-display text-[26px] text-start uppercase leading-tight sm:text-[30px]">
             Welcome back, {userAuthInfo?.username  ?  userAuthInfo?.username :  "Hi there"} 👋.
           </h1>
           
-        </div>
+  
  <Link href="/dashboard/undergraduate/profile"
  className="border border-gold-300 dark:bg-ink-soft 
-  d w-[50px] h-10 rounded-full bg-paper-soft">
+  d w-[50px] h-10 rounded-full bg-paper-soft justify-end">
           <User className="h-10 w-10 p-3 text-ink dark:text-paper-surface"/>
           </Link>
           </div>
        
         
        
-    
-          <div className="rounded-md border lg:w-1/2 justify-end w-full  flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
+      <div className="flex justify-end items-center w-full ">
+      
+          {/* <div className="rounded-md border lg:w-1/3 justify-center w-full
+            flex flex-col items-end border-gold-400/40 bg-gold-400/5 px-5 py-3 text-right">
+
             <p className="text-[11px] text-start uppercase tracking-wide text-current/45">
               ACADEMIC SESSION AS BEGUN
             </p>
             <p className="font-display text-[20px] text-start text-gold-600 dark:text-gold-300">
                   PLAY GAMES WITH FRIENDS
             </p>
+          </div> */}
+            <UndergraduateExamCountdown
+  examDate={examSchedule?.exam_date ?? ""}
+  examLabel={examSchedule?.exam_label ?? "Exam"}
+/>
           </div>
      
       

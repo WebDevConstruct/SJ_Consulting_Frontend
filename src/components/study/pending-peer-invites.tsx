@@ -155,7 +155,7 @@ useEffect(() => {
           >
             <div>
               <p className="text-[13.5px] font-medium">
-                {invite.identifier} invited you
+                {invite.inviter_identifier} invited you
               </p>
               <p className="text-[12px] text-current/55">
                 Expires{" "}
