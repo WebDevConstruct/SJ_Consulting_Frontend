@@ -62,7 +62,7 @@ export function UndergraduateExamCountdown({
   return (
     <section
       aria-label={`${examLabel} countdown`}
-      className=" border-b z-0 border-gold-300/60 w-full 
+      className=" border-b border-gold-300/60 w-full 
        bg-gold-metal-soft/40 backdrop-blur dark:border-gold-600/40 dark:bg-ink/95"
     >
       <div className="flex w-full lg:flex-row flex-col items-end justify-center lg:items-center lg:justify-end gap-x-4 gap-y-1 px-4 py-2.5 sm:px-6">
@@ -72,7 +72,7 @@ export function UndergraduateExamCountdown({
             : `${time.days} days to ${examLabel}`}
         </p>
 
-        <div className="flex items-center gap-1.5 font-display text-lg font-bold tabular-nums text-ink dark:text-paper sm:text-xl">
+        <div className="flex items-center gap-1.5  text-lg font-bold tabular-nums text-ink dark:text-paper sm:text-xl">
           {time.isExpired ? (
             <span>Good luck!</span>
           ) : (
