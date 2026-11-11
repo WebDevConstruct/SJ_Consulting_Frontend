@@ -6,16 +6,44 @@ import PricingCatalogue, {
   type PricingProduct,
 } from "@/components/pricing/PricingCatalogue";
 
-import { pricingDemoProducts } from
-  "@/components/pricing/pricing-demo-data";
+import { pricingDemoProducts } from "@/components/pricing/pricing-demo-data";
+import { payWithPaystack } from "@/lib/paystack";
+import { createClient } from "@/lib/supabase/client";
 
 export default function PricingPage() {
   const [purchaseNotice, setPurchaseNotice] = useState("");
+  const supabase = createClient();
 
-  function handleBuy(product: PricingProduct) {
-    setPurchaseNotice(
-      `You selected ${product.title}. Checkout is not connected yet.`,
-    );
+  async function handleBuy(product: PricingProduct) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setPurchaseNotice("Please sign in or create an account to purchase a subscription.");
+      window.location.href = "/signin?redirect=/pricing";
+      return;
+    }
+
+    const planType =
+      product.id.includes("gst") || product.title.toLowerCase().includes("gst")
+        ? "gst_year1"
+        : "cbt_premium";
+
+    const amountKobo = Math.round((product.price || 5000) * 100);
+
+    payWithPaystack({
+      email: user.email || "",
+      userId: user.id,
+      amountKobo: amountKobo > 0 ? amountKobo : 500000,
+      planType,
+      onSuccess: (ref) => {
+        setPurchaseNotice(`Payment successful! Reference: ${ref}. Subscription activated.`);
+      },
+      onClose: () => {
+        setPurchaseNotice("Transaction closed.");
+      },
+    });
   }
 
   return (

@@ -1,16 +1,13 @@
 "use client";
 
 import type { CbtMode, CbtTrack } from "@/lib/study/types";
+import { startCBTSession, submitCBTSession } from "@/lib/api";
 
-
-
-export type CbtOption =
-  
-{
-      id?: string;
-      label?: string;
-      text?: string;
-    };
+export type CbtOption = {
+  id?: string;
+  label?: string;
+  text?: string;
+};
 
 export type CbtQuestion = {
   id: string;
@@ -26,9 +23,9 @@ export type StartedSession = {
   kind: "solo" | "peer" | "multiplayer";
   mode: CbtMode;
   track_type: CbtTrack;
-  submit_deadline ?: string | null;
-  subjectId ?: string | null;
- courseId ?: string | null;
+  submit_deadline?: string | null;
+  subjectId?: string | null;
+  courseId?: string | null;
   question_count: number;
   duration_seconds: number;
   questions: CbtQuestion[];
@@ -54,6 +51,7 @@ export type SubmissionResult = {
   score_percent: number;
   answers: SubmittedAnswer[];
 };
+
 type StartSessionInput = {
   kind: "solo" | "peer";
   mode: CbtMode;
@@ -61,89 +59,134 @@ type StartSessionInput = {
   subjectId?: string | null;
   topicId?: string | null;
   courseId?: string | null;
-  subjectIds ?: string[] | null;
+  subjectIds?: string[] | null;
   questionCount?: number;
   durationSeconds?: number;
 };
 
 export async function startCbtSession(
-  supabase : any,
+  _supabase: any,
   input: StartSessionInput,
 ): Promise<StartedSession> {
-  const { data, error } = await supabase.rpc("start_cbt_session", {
-    p_kind: input.kind,
-    p_mode: input.mode,
-    p_track_type: input.trackType,
-    p_subject_id: input.subjectId ?? null,
-    p_course_id: input.courseId  ?? null,
-    p_topic_id: input.topicId ?? null,
-    p_subject_ids: input.subjectIds ?? null,
-    p_question_count: input.questionCount ?? 10,
-    p_duration_seconds: input.durationSeconds ?? 1800,
+  const subject = input.subjectId || "economics";
+  const track =
+    input.trackType === "topic" || input.trackType === "combination"
+      ? input.trackType
+      : "subject";
+
+  const res = await startCBTSession({
+    subject: subject.toLowerCase(),
+    track_type: track,
+    mode: input.kind === "peer" ? "peer" : "solo",
   });
 
-  if (error) throw error;
+  const mappedQuestions: CbtQuestion[] = (res.questions || []).map((q) => ({
+    id: q.id,
+    prompt: q.context_text
+      ? `${q.context_text}\n\n${q.question_text}`
+      : q.question_text,
+    options: Object.entries(q.options || {}).map(([key, val]) => ({
+      id: key,
+      label: key,
+      text: String(val),
+    })),
+  }));
 
-  return data;
+  return {
+    session_id: res.session.id,
+    kind: input.kind,
+    mode: input.mode,
+    track_type: input.trackType,
+    submit_deadline: res.session.expires_at,
+    subjectId: res.session.subject,
+    courseId: input.courseId ?? null,
+    question_count: res.questions.length,
+    duration_seconds: res.session.time_limit_seconds,
+    questions: mappedQuestions,
+  };
 }
 
 export async function submitCbtSession(
-  supabase: any,
+  _supabase: any,
   sessionId: string,
   answers: Record<string, string | null>,
 ): Promise<SubmissionResult> {
-  const payload = Object.entries(answers).map(
-    ([questionId, selectedOption]) => ({
-      question_id: questionId,
-      selected_option: selectedOption,
-    }),
-  );
+  const safeAnswers: Record<string, "A" | "B" | "C" | "D"> = {};
+  for (const [k, v] of Object.entries(answers)) {
+    if (v && ["A", "B", "C", "D"].includes(v.toUpperCase())) {
+      safeAnswers[k] = v.toUpperCase() as "A" | "B" | "C" | "D";
+    }
+  }
 
-  const { data, error } = await supabase.rpc("submit_cbt_session", {
-    p_session_id: sessionId,
-    p_answers: payload,
+  const res = await submitCBTSession({
+    session_id: sessionId,
+    answers: safeAnswers,
   });
 
-  if (error) throw error;
-
-  return data;
+  return {
+    session_id: sessionId,
+    total: res.total_questions,
+    correct: res.score,
+    score_percent: res.percentage,
+    answers: Object.entries(safeAnswers).map(([qId, opt]) => ({
+      question_id: qId,
+      prompt: "",
+      options: [],
+      selected_option: opt,
+      correct_option: null,
+      is_correct: false,
+      explanation: "",
+    })),
+  };
 }
 
 export async function revealPracticeAnswer(
-  supabase: any,
-  sessionId: string,
+  _supabase: any,
+  _sessionId: string,
   questionId: string,
 ): Promise<{
   question_id: string;
   correct_option: string;
   explanation: string;
 }> {
-  const { data, error } = await supabase.rpc("reveal_practice_answer", {
-    p_session_id: sessionId,
-    p_question_id: questionId,
-  });
-
-  if (error) throw error;
-
-  return data;
+  return {
+    question_id: questionId,
+    correct_option: "",
+    explanation: "Answers are graded and scored server-side upon session submission.",
+  };
 }
 
-
-//RETRIEVING EXISTING USER SESSION USING THE SESSIONiD, ALREADY CONNECTED TO PREVIOSLY BEFORE DISCONNECT
+// RETRIEVING EXISTING USER SESSION USING THE SESSION ID
 export async function getPeerSession(
   supabase: any,
   sessionId: string,
 ): Promise<StartedSession & { status: string }> {
-  const { data, error } = await supabase.rpc("get_peer_session", {
-    p_session_id: sessionId,
-  });
+  const { data, error } = await supabase
+    .from("cbt_peer_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .maybeSingle();
 
-  if (error) throw error;
+  if (error || !data) {
+    throw new Error(error?.message ?? "Peer session not found");
+  }
 
-  return data;
+  return {
+    session_id: data.id,
+    kind: "peer",
+    mode: "exam",
+    track_type: data.track_type,
+    submit_deadline: data.expires_at,
+    subjectId: data.subject,
+    courseId: null,
+    question_count: data.total_questions,
+    duration_seconds: data.time_limit_seconds,
+    questions: [],
+    status: data.status,
+  };
 }
 
-//The STARTING AND INITIALISATION OF PEER SESSIONS
+// THE STARTING AND INITIALISATION OF PEER SESSIONS
 export async function startPeerSession(
   supabase: any,
   sessionId: string,
@@ -154,11 +197,19 @@ export async function startPeerSession(
   submit_deadline: string;
   duration_seconds: number;
 }> {
-  const { data, error } = await supabase.rpc("start_peer_session", {
-    p_session_id: sessionId,
-  });
+  const { data, error } = await supabase
+    .from("cbt_peer_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .single();
 
-  if (error) throw error;
+  if (error || !data) throw error;
 
-  return data;
+  return {
+    session_id: data.id,
+    status: data.status,
+    started_at: data.started_at || new Date().toISOString(),
+    submit_deadline: data.expires_at,
+    duration_seconds: data.time_limit_seconds,
+  };
 }

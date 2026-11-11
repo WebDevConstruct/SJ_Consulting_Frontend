@@ -133,13 +133,9 @@ const facultySwitch = (f_value : string)=> {
    const {data, error} = await supabase?.auth?.getUser();
   if(error) return showToast({title : "Identification error", message : "Log in again to continue studying", kind : "error"})
    const {data : profile, error : profileError} = 
-   await supabase.from("users")
-   .update({account_verification : {
-   subject_combination :   subjectCombinationValue,
-   desired_college : collegeValue,
-   desired_faculty : facultyValue,
-   desired_department : departmentValue
-   }
+   await supabase.from("profiles")
+   .update({
+     jamb_subjects: subjectCombinationValue.split(",").map((s: string) => s.trim()),
    })
     .eq("id", data?.user?.id)
     .select()

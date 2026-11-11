@@ -1,5 +1,7 @@
 "use client";
 
+import { createPeerDuel, joinPeerDuel, cancelPeerDuel } from "@/lib/api";
+
 export type PeerInvite = {
   id: string;
   session_id: string;
@@ -12,42 +14,46 @@ export type PeerInvite = {
 };
 
 export async function createPeerInvite(
-  supabase: any,
+  _supabase: any,
   sessionId: string,
   identifier: string,
-  expiryMinutes = 15,
+  _expiryMinutes = 15,
 ): Promise<PeerInvite> {
-  const { data, error } = await supabase.rpc("create_peer_invite", {
-    p_session_id: sessionId,
-    p_identifier: identifier.trim(),
-    p_expiry_minutes: expiryMinutes,
+  const duel = await createPeerDuel({
+    subject: "economics",
+    track_type: "subject",
+    opponent_username: identifier.trim(),
   });
 
-  if (error) throw error;
-
-  return data;
+  return {
+    id: duel.peer_session_id,
+    session_id: duel.peer_session_id,
+    invited_by: "",
+    invited_user_id: "",
+    identifier: identifier.trim(),
+    inviter_identifier: null,
+    status: "pending",
+    expires_at: duel.expires_at,
+  };
 }
 
 export async function acceptPeerInvite(
-  supabase: any,
+  _supabase: any,
   inviteId: string,
 ): Promise<{ session_id: string; status: string }> {
-  const { data, error } = await supabase.rpc("accept_peer_invite", {
-    p_invite_id: inviteId,
+  const result = await joinPeerDuel({
+    peer_session_id: inviteId,
   });
 
-  if (error) throw error;
-
-  return data;
+  return {
+    session_id: result.cbt_session_id,
+    status: "in_progress",
+  };
 }
 
 export async function cancelPeerInvite(
-  supabase: any,
+  _supabase: any,
   inviteId: string,
 ): Promise<void> {
-  const { error } = await supabase.rpc("cancel_peer_invite", {
-    p_invite_id: inviteId,
-  });
-
-  if (error) throw error;
+  await cancelPeerDuel(inviteId);
 }

@@ -6,68 +6,51 @@ import Link from "next/link";
 import { AuthLayout } from "@/components/forms/auth-layout";
 import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
-import {createClient} from "@/lib/supabase/client";
-import {useStatusToast} from "@components/ui/status-toast";
+import { createClient } from "@/lib/supabase/client";
+import { useStatusToast } from "@components/ui/status-toast";
+import { login } from "@/lib/api";
+
 export function SignInForm() {
-  const {showToast} = useStatusToast()
+  const { showToast } = useStatusToast();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
- event.preventDefault()
+    event.preventDefault();
     setSubmitting(true);
-const supabase = createClient()
- 
-try{
-  console.log("Running")
-    const {data, error : responseError} = await supabase.auth.signInWithPassword({
-      email : String(email ?? "").trim(),
-      password: String(password ?? ""),
-      // Sent alongside every sign-in request per the brief, for device monitoring.
-     
-    });
+    setError(null);
 
-    setSubmitting(false);
+    try {
+      const result = await login({
+        identifier: String(email ?? "").trim(),
+        password: String(password ?? ""),
+      });
 
-if(responseError){
-   showToast({
-      kind : "error",
-      title : "Error Signing In",
-      message :  responseError.message || "An Unexpected error has occured.",
-     // statusCode : Number(responseError.code) 
-    })
-// console.log("SignInError", {
-//   name : error?.name,
-//   code : error?.code,
-//   message : error?.message
-// });
-}
-if(data.user){
-  console.log(data.user);
-   showToast({
-      kind : "success",
-      title : "Success",
-      message : "SignIn Successful",
-      statusCode : 200
-    })
-    router.push("/dashboard");
-}
-}catch(error){
-  if( error){
-  showToast({
-      kind : "error",
-      title : "Error Signing In",
-      message : "An Unexpected error has occured.",
-    
-    })
+      setSubmitting(false);
 
-  }
-
-  setError("Error Signing in")
-}
+      if (result?.user) {
+        showToast({
+          kind: "success",
+          title: "Success",
+          message: "Sign in successful",
+          statusCode: 200,
+        });
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setSubmitting(false);
+      const msg = err?.message || "Invalid username/email or password.";
+      showToast({
+        kind: "error",
+        title: "Error Signing In",
+        message: msg,
+      });
+      setError(msg);
+    }
   };
 
   return (
