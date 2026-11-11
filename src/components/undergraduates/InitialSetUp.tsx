@@ -253,9 +253,9 @@ const InitialSetUp = ({
 
       const { data: profile, error: profileError } =
         await supabase
-          .from("users")
+          .from("profiles")
           .update({
-            account_verification: accountVerification,
+            unilag_year: parseInt(levelValue, 10) || 1,
           })
           .eq("id", authData.user.id)
           .select()
