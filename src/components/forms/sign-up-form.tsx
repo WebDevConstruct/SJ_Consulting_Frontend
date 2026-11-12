@@ -58,7 +58,7 @@ try {
       email :String(email ?? "").trim(),
      password : String(password ?? "")?.trim() || "",
       options : {
-      emailRedirectTo : `https://sjeduhub.com/auth/callback`,
+      emailRedirectTo : `https://sjeduhub.com/auth/confirm`,
         data : {
             phone: String(phone ?? "").trim(),
       username: String(username ?? "").trim(),

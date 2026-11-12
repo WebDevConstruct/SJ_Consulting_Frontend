@@ -12,7 +12,7 @@ import { useGlobalContext } from "../../../../../../../../../Context";
 import {  SoloModeModal, InvitePeerOverlay, SoloTrackModal, TimingHeadsUpModal, CbtRunnerOverlay, PendingPeerInvites}
  from "@/components/study";
 import   { type usermetadata} from "@/types/UserTypes";
-import {  StartedSession, SubmissionResult } from "@/lib/study/cbt-api";
+import {  StartedSession, SubmitCbtSessionResult} from "@/lib/study/cbt-api";
 import { CbtMode, CbtTrack,  } from "@/lib/study/types";
 import {type SessionNotification} from "@components/SessionResultPopUp";
 import { createClient} from "@lib/supabase/client";
@@ -41,7 +41,7 @@ const StudyCoursePage = () => {
   const [multiplayerAvailable, setMultiplayerAvailable] = useState(false);
   const [loading, setLoading] = useState(true);
      const [runnerMode, setRunnerMode] = useState<CbtMode>("practice");
-    const [lastResult, setLastResult] = useState<SubmissionResult>({} as SubmissionResult);
+    const [lastResult, setLastResult] = useState<SubmitCbtSessionResult>({} as SubmitCbtSessionResult);
    
   const [userIdTransfer, setUserIdTransfer] = useState<string>("");
   const [userInfoAuth, setUserInfoAuth] = useState<usermetadata>({} as usermetadata);
@@ -384,7 +384,7 @@ const StudyCoursePage = () => {
   closeAll()
   }
   }
-    const handleRunnerFinish = (result: SubmissionResult) => {
+    const handleRunnerFinish = (result: SubmitCbtSessionResult) => {
       setLastResult(result);
       setRunnerOpen(false);
       setAcceptedSession( { 
@@ -425,7 +425,7 @@ const StudyCoursePage = () => {
         <button
           type="button"
           onClick={() =>
-            router.push("/dashboard/undergraduate/cbt")
+            router.push(`/dashboard/undergraduate/study/cbt`)
           }
           className="text-sm font-medium bg-gold-metal-soft py-3 px-5 rounded-md 
           text-ink dark:text-paper-surface text-ink/60 hover:text-ink 

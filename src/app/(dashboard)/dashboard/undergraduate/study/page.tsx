@@ -1,16 +1,8 @@
 "use client";
-
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpenCheck,  ScrollText } from "lucide-react";
 import { GlossyCard } from "@/components/study/glossy-card";
-import { type StartedSession, SubmissionResult,  } from "@/lib/study/cbt-api";
-import type { CbtMode, } from "@/lib/study/types";
 import { AccountCompletionRequired } from "@/components/SettingUpModals/AccounCompletionRequired";
-import { createClient } from "@/lib/supabase/client";
-import  {type SubjectOption, type TopicOption, type CombinationOption}  from "@/components/study/SoloTrackModal"
-
-import { usermetadata } from "@/types/UserTypes";
 import {useGlobalContext} from "../../../../../../Context"
 import {useStatusToast} from "@/components/ui/status-toast";
 type Modal =
@@ -25,7 +17,6 @@ type Modal =
 
 
 export default function StudyHubPage() {
-  const supabase = createClient();
   const {showToast} = useStatusToast();
 
 const {userAuthInfo} = useGlobalContext()

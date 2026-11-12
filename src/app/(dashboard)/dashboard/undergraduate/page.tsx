@@ -14,7 +14,7 @@ import {SettingUpAccount} from "@components/SettingUpAccount";
 import {useDashboardPreview} from "../../../../hooks/use-dashboard-preview";
 import { LeaderboardPreview } from "@/components/dashboard/leaderboard-preview";
 import { PerformanceAnalysis } from "@/components/dashboard/performance-analysis";
-import {UndergraduateExamCountdown} from "@/components/dashboard/undergraduate-exam-countdown"
+import {UndergraduateExamCountdown} from "@/components/dashboard/undergraduate-exam-countdown";
 export default function UndergraduateDashboardPage() {
   //const { user } = useSession();
   //const year = user?.undergraduate?.year ?? 1;

@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import { Check, Clock, Grid3x3, X } from "lucide-react";
 import {
   submitCbtSession,
-  type StartedSession,
-  type SubmissionResult,
+  type StartedSession, type SubmitSessionOpponent,
+  type SubmitCbtSessionResult, type SubmitSessionAnswer
 } from "@/lib/study/cbt-api";
 import { createClient } from "@/lib/supabase/client";
 import {useSessionResultPopUp} from "@components/useSessionResultPopUp";
@@ -21,7 +21,7 @@ interface CbtRunnerOverlayProps {
   session: StartedSession | null;
   onExit?: () => void;
   submitDeadline?: string | null;
-  onFinish: (result: SubmissionResult) => void;
+  onFinish: (result: SubmitCbtSessionResult) => void;
   userId ?: string
 }
 
@@ -29,6 +29,14 @@ interface NormalizedOption {
   id: string;
   text: string;
 }
+
+type OpponentStatus =
+  | "invited"
+  | "accepted"
+  | "active"
+  | "running"
+  | "disconnected"
+  | "completed";
 
 function normalizeOptions(options: unknown[]): NormalizedOption[] {
   return (options ?? []).map((option, index) => {
@@ -103,9 +111,10 @@ const { notification, showResultForSession} = useSessionResultPopUp(supabase, us
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const {setAcceptedSession, setRecipientSession, acceptedSession , recipientSession} = useGlobalContext()
-  const [result, setResult] = useState<SubmissionResult | null>(
+  const [result, setResult] = useState<SubmitCbtSessionResult | null>(
     null,
   );
+  const [participantInfo, setParticipantInfo] = useState<SubmitSessionOpponent | null>(null);
   const [waitingRoom, setWaitingRoom] = useState(false);
   const current = questions[index];
   const currentOptions = useMemo(
@@ -116,6 +125,7 @@ const { notification, showResultForSession} = useSessionResultPopUp(supabase, us
   const answeredCount = Object.values(answers).filter(
     Boolean,
   ).length;
+
 
   const participantsInSession = async()=> {
      if(!session?.session_id) return;
@@ -152,6 +162,62 @@ if(data?.status === "completed"){
 
   }
   
+
+
+  const [opponentStatus, setOpponentStatus] =
+          useState<OpponentStatus | null>(null);
+      
+        useEffect(() => {
+          console.log(session?.session_id, participantInfo?.user_id);
+          if (!session?.session_id || !participantInfo?.user_id) return;
+      
+          let isMounted = true;
+      
+          async function loadOpponentStatus() {
+            const { data, error } = await supabase
+              .from("cbt_session_participants")
+              .select("status")
+              .eq("session_id", session?.session_id)
+              .eq("user_id", participantInfo?.user_id)
+              .maybeSingle();
+      
+            if (!isMounted) return;
+      
+            if (!error && data?.status) {
+              setOpponentStatus(data.status as OpponentStatus);
+            }
+          }
+      
+          void loadOpponentStatus();
+         if(!session?.session_id || !participantInfo?.user_id) return;
+          const channel = supabase
+            .channel(`opponent-submission:${session?.session_id}:${participantInfo?.user_id}`)
+            .on(
+              "postgres_changes",
+              {
+                event: "UPDATE",
+                schema: "public",
+                table: "cbt_session_participants",
+                filter: `user_id=eq.${participantInfo?.user_id}`,
+              },
+              (payload) => {
+                const updated = payload.new as { status?: OpponentStatus };
+      
+                if (updated.status) {
+                  setOpponentStatus(updated.status);
+                }
+              },
+            )
+            .subscribe();
+      
+          return () => {
+            isMounted = false;
+            supabase.removeChannel(channel);
+          };
+        }, [session?.session_id, participantInfo?.user_id, supabase, submitting]);
+      
+        const opponentSubmitted = opponentStatus === "completed";
+      
   const handleSubmit = async () => {
     console.log(session);
     if (!session || submitting) return;
@@ -159,27 +225,27 @@ if(data?.status === "completed"){
     setSubmitting(true);
 
     try {
-      const payload = {
-        answers: Object.entries(answers)
-          .filter(([, selected]) => Boolean(selected))
-          .map(([questionId, selected]) => ({
-            question_id: questionId,
-            selected,
-          })),
-      };
+      // const payload = {
+      //   answers: Object.entries(answers)
+      //     .filter(([, selected]) => Boolean(selected))
+      //     .map(([questionId, selected]) => ({
+      //       question_id: questionId,
+      //       selected,
+      //     })),
+      // };
 
+
+      ///////////============= THE OPPONENT STATUS CHECK=============\\\\\\\
+       
       const submitted = await submitCbtSession(
         supabase,
         session.session_id,
         answers,
       );
       if(submitted?.score_percent){
-     const {data  , error} = await supabase.from("cbt_sessions")
-     .select("status")
-     .eq("id", session?.session_id)
-      .maybeSingle();
-
-      if(error){
+    
+//participantsInSession()
+      if(!submitted?.session_id){
         showToast({
           kind : "error",
           title : "A Session Retrieval Error",
@@ -187,19 +253,20 @@ if(data?.status === "completed"){
 })
 
       }
-      
-      if(data?.status === "completed" ){
-    
-        setSessionStatus("completed")
-       // console.log(session?.session_id)
-     await showResultForSession(session?.session_id)
+     console.log("Checking the Opponents Value", submitted?.opponent)
+      if(submitted?.opponent?.status=== "completed" ){
+        setParticipantInfo(submitted?.opponent)
+     setSessionStatus("completed")
+      await showResultForSession(session?.session_id)
        setWaitingRoom(false);
-  //     alert("Your session is completed")
-      }else if(data?.status === "running"){
-        //alert("Your session is still running")
-         //  SessionCheck();
-           participantsInSession();
-           setWaitingRoom(true)
+
+      }else if(submitted?.opponent?.status === "active" 
+        || submitted?.opponent?.status === "invited" 
+        || submitted?.opponent?.status === "accepted" || submitted?.opponent
+        ?.status === "disconnected"){
+          setParticipantInfo(submitted.opponent)
+   participantsInSession();
+   setWaitingRoom(true)
       
       }
   
@@ -262,40 +329,7 @@ if(data?.status === "completed"){
   }, [open, session, submitDeadline]);
 
   //Listening for Session Notifications
-  useEffect(() => {
-   
-    
-  if (!session?.session_id) return;
-  const channel = supabase
-    .channel(`session-waiting-room:${session?.session_id}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "cbt_sessions",
-        filter: `id=eq.${session?.session_id}`,
-      },
-      async (payload) => {
-        const updated = payload.new;
-        alert(updated?.status);
-        setSessionStatus(updated.status);
 
-        if (updated.status === "completed") {
-        //  alert("This is meant to be running")
-          setWaitingRoom(false);
-          setSessionStatus("completed");
-          await showResultForSession(session?.session_id || "");
-        }
-      }
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-   
-  };
-}, [supabase, session?.session_id, showResultForSession, sessionStatus, submitting]);
 //console.log(notification)
   useEffect(() => {
     if (!open) {
@@ -388,7 +422,7 @@ window.location.reload()
     })
   }
  if (result) {
-  const reviewAnswers = result.answers ?? [];
+  const reviewAnswers : SubmitSessionAnswer[] = result.answers ?? [];
 
   const normalizeLetter = (
     value: string | null | undefined,
@@ -396,7 +430,7 @@ window.location.reload()
 
  // console.log(notification)
 
-
+//console.log(recipientSession);
   
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-paper dark:bg-ink">
@@ -616,9 +650,12 @@ window.location.reload()
         </button>
       </div>
     
-      {waitingRoom === true && sessionStatus === "running" && session?.kind !== "solo" ?  (
+      {waitingRoom === true && 
+     // sessionStatus === "running"
+      opponentSubmitted === false && session?.kind !== "solo" ?  (
   <SessionWaitingRoom
     sessionId={acceptedSession?.session_id ?? recipientSession?.session_id ?? ""}
+    opponentUserId={participantInfo?.user_id ? participantInfo?.user_id : ""}
     submitDeadline={session?.submit_deadline ?? null}
     sessionKind={session?.kind ?? "peer"}
     completedParticipants={participantsSessionCompleted}

@@ -21,6 +21,13 @@ export type CbtQuestion = {
   explanation?: string | null;
 };
 
+export type CbtParticipantStatus =
+  | "invited"
+  | "accepted"
+  | "active"
+  | "disconnected"
+  | "completed";
+
 export type StartedSession = {
   session_id: string;
   kind: "solo" | "peer" | "multiplayer";
@@ -47,13 +54,46 @@ export type SubmittedAnswer = {
   explanation: string;
 };
 
-export type SubmissionResult = {
-  session_id: string;
-  total: number;
-  correct: number;
-  score_percent: number;
-  answers: SubmittedAnswer[];
+export type SubmitSessionParticipant = {
+  user_id: string;
+  status: CbtParticipantStatus;
+  completed_at: string | null;
+  final_rank: number | null;
+  points_awarded: number | null;
+  is_winner: boolean;
 };
+
+export type SubmitSessionOpponent = SubmitSessionParticipant | null;
+
+export type SubmitSessionAnswer = {
+  question_id: string;
+  prompt: string;
+  options: Array<
+    
+    | {
+        id?: string;
+        label?: string;
+        text?: string;
+        value?: string;
+      }
+  >;
+  selected_option: string | null;
+  correct_option: string | null;
+  is_correct: boolean;
+  explanation: string;
+};
+
+export type SubmitCbtSessionResult = {
+  session_id: string;
+  score: number;
+  correct: number;
+  total: number;
+  answered: number;
+  unanswered: number;
+  score_percent: number;
+  opponent : SubmitSessionOpponent;
+  answers : SubmitSessionAnswer[]
+}
 type StartSessionInput = {
   kind: "solo" | "peer";
   mode: CbtMode;
@@ -91,7 +131,7 @@ export async function submitCbtSession(
   supabase: any,
   sessionId: string,
   answers: Record<string, string | null>,
-): Promise<SubmissionResult> {
+): Promise<SubmitCbtSessionResult> {
   const payload = Object.entries(answers).map(
     ([questionId, selectedOption]) => ({
       question_id: questionId,

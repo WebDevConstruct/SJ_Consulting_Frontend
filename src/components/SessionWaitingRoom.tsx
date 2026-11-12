@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-
+import { createClient} from "@lib/supabase/client";
 type Props = {
   sessionId: string;
+   opponentUserId: string;
   submitDeadline: string | null;
+
   sessionKind: "peer" | "multiplayer";
   completedParticipants?: number;
   totalParticipants?: number;
@@ -10,6 +12,14 @@ type Props = {
   onSessionCompleted: () => void;
   
 };
+
+
+
+
+ 
+
+
+  
 
 function formatRemaining(ms: number) {
   if (ms <= 0) return "00:00";
@@ -28,6 +38,7 @@ function formatRemaining(ms: number) {
 
 export default function SessionWaitingRoom({
   sessionId,
+  opponentUserId,
   submitDeadline,
   sessionKind,
   completedParticipants = 0,
@@ -38,8 +49,9 @@ export default function SessionWaitingRoom({
 }: Props) {
   const [remainingMs, setRemainingMs] = useState(0);
   
+//const supabase = createClient();
 
-
+ 
 
   useEffect(() => {
     if (!submitDeadline) return;

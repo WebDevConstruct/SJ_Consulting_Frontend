@@ -57,7 +57,7 @@ export const undergraduateNavItems: DashboardNavItem[] = [
     label: "Analysis",
     icon: BarChart3,
   },
-   { href: "/dashboard/undergraduate", label: "Accommodation", icon: House },
+   { href: "#", label: "Accommodation", icon: House },
   {
     href: "/dashboard/undergraduate/profile",
     label: "Profile",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthLayout } from "@/components/forms/auth-layout";
@@ -8,7 +8,11 @@ import { TextField } from "@/components/forms/text-field";
 import { PasswordField } from "@/components/forms/password-field";
 import {createClient} from "@/lib/supabase/client";
 import {useStatusToast} from "@components/ui/status-toast";
+import { useSearchParams } from "next/navigation";
 export function SignInForm() {
+  const params = useSearchParams();
+  const EmailVerification = params?.get("isverified") === "true"
+
   const {showToast} = useStatusToast()
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -16,6 +20,21 @@ export function SignInForm() {
   const [needsVerification, setNeedsVerification] = useState(false);
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("")
+
+useEffect(()=> {
+   async function  checkVerification(){
+   const supabase = createClient();
+   const { data, error}= await supabase.auth.getSession();
+   if(data?.session?.user?.email_confirmed_at){
+    router.push(`/dashboard/${data?.session?.user?.user_metadata?.user_type}`)
+   }else{
+    router.replace("/signin")
+   }
+   }
+  void checkVerification()
+
+
+},[])
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
  event.preventDefault()
     setSubmitting(true);

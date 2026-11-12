@@ -1,6 +1,4 @@
 "use client"
-
-import { AnyARecord } from "dns";
 import { useGlobalContext} from "../../Context"
 
 export function useSessionResultPopUp(supabase:any, userId?: string) {
