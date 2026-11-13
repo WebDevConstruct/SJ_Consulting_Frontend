@@ -6,7 +6,7 @@ import { Book, Lock, Search, Target, BookCopy } from "lucide-react";
 
 import { Button } from "@components/Button";
 import { useStatusToast } from "@/components/ui/status-toast";
-
+import { CoursePaymentModal } from "./CoursePaymentModal";
 import type {
   MultiplayerSessionNotification,
   StudentCBTCoursesResponse,
@@ -20,7 +20,8 @@ type CBTPageProps = {
 
 const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
   const { showToast } = useStatusToast();
-
+   const [paymentCourse, setPaymentCourse] = useState<StudentCourse | null>(null);
+   const [paymentOpen, setPaymentOpen] = useState(false);
   const [data, setData] = useState<StudentCBTCoursesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,14 +87,15 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
     );
   }, [data?.courses, searchQuery]);
 
-  const handlePrimaryAction = (course: StudentCourse) => {
-    if (course.access_status === "locked") {
-      onBuyCourse(course);
-      return;
-    }
-
+ const handlePrimaryAction = (course: StudentCourse) => {
+  if (course.access_status === "unlocked") {
     onStudyCourse(course);
-  };
+    return;
+  }
+
+  setPaymentCourse(course);
+  setPaymentOpen(true);
+};
 
   return (
     <main className="min-h-screen bg-paper-soft px-4 py-10 text-ink sm:px-6 lg:px-10 dark:bg-ink dark:text-paper">
@@ -241,6 +243,19 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
             )}
           </section>
         )}
+        <CoursePaymentModal
+  open={paymentOpen}
+  course={paymentCourse}
+  onClose={() => {
+    setPaymentOpen(false);
+    setPaymentCourse(null);
+  }}
+  onAccessGranted={(course) => {
+    setPaymentOpen(false);
+    setPaymentCourse(null);
+    onStudyCourse(course);
+  }}
+/>
       </div>
     </main>
   );

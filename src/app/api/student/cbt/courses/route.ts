@@ -14,7 +14,7 @@ type CourseRow = {
   course_code: string | null;
   course_title: string | null;
   objective: string | null;
-  short_description  ?: string | null;
+  short_description?: string | null;
   college_name: string | null;
   price: number | null;
   currency: string | null;
@@ -31,6 +31,27 @@ type AccessRow = {
   padlock: boolean;
 };
 
+type PaymentRequestRow = {
+  id: string;
+  course_id: string;
+  status:
+    | "pending_payment"
+    | "payment_claimed"
+    | "receipt_sent"
+    | "approved"
+    | "rejected"
+    | "cancelled"
+    | "expired";
+  claimed_at: string | null;
+  receipt_sent_at: string | null;
+  approved_at: string | null;
+  rejected_at: string | null;
+  expires_at: string | null;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type MultiplayerRow = {
   id: string;
   course_id: string;
@@ -42,6 +63,12 @@ type MultiplayerRow = {
     | { status: string }
     | null;
 };
+
+const ACTIVE_PAYMENT_STATUSES = [
+  "pending_payment",
+  "payment_claimed",
+  "receipt_sent",
+] as const;
 
 export async function GET() {
   const supabase = await createClient();
@@ -73,7 +100,7 @@ export async function GET() {
       multiplayer_session: null,
     });
   }
-//console.log("faculty", faculty, "department", department);
+
   const { data: courses, error: coursesError } = await supabase
     .from("courses")
     .select(
@@ -94,15 +121,15 @@ export async function GET() {
       )
     `,
     )
-
-    
-
     .eq("status", "published")
     .ilike("college_name", college?.toLowerCase() || "")
     .eq("course_offerings.is_active", true)
     .ilike("course_offerings.faculty_name", faculty?.toLowerCase() || "")
-    .ilike("course_offerings.department_name", department?.toLowerCase() || "")
-    .ilike("course_offerings.level", level|| "")
+    .ilike(
+      "course_offerings.department_name",
+      department?.toLowerCase() || "",
+    )
+    .ilike("course_offerings.level", level || "")
     .returns<CourseRow[]>();
 
   if (coursesError) {
@@ -130,10 +157,67 @@ export async function GET() {
     (accessRows ?? []).map((row) => [row.course_id, row.padlock]),
   );
 
+  let paymentRequests: PaymentRequestRow[] = [];
+
+  if (courseIds.length > 0) {
+    const { data: paymentRows, error: paymentError } = await supabase
+      .from("course_payment_requests")
+      .select(
+        `
+        id,
+        course_id,
+        status,
+        claimed_at,
+        receipt_sent_at,
+        approved_at,
+        rejected_at,
+        expires_at,
+        admin_note,
+        created_at,
+        updated_at
+      `,
+      )
+      .eq("user_id", user.id)
+      .in("course_id", courseIds)
+      .in(
+        "status",
+        ACTIVE_PAYMENT_STATUSES as unknown as string[],
+      )
+      .order("created_at", { ascending: false });
+
+    if (paymentError) {
+      return NextResponse.json(
+        { error: paymentError.message },
+        { status: 500 },
+      );
+    }
+
+    paymentRequests = (paymentRows ?? []) as PaymentRequestRow[];
+  }
+
+  const latestPaymentByCourseId = new Map<
+    string,
+    PaymentRequestRow
+  >();
+
+  for (const paymentRequest of paymentRequests) {
+    const existing = latestPaymentByCourseId.get(
+      paymentRequest.course_id,
+    );
+
+    if (!existing) {
+      latestPaymentByCourseId.set(
+        paymentRequest.course_id,
+        paymentRequest,
+      );
+    }
+  }
+
   const normalizedCourses = (courses ?? []).map((course) => {
     const padlock = accessByCourseId.get(course.id);
-
     const isLocked = padlock !== false;
+
+    const paymentRequest = latestPaymentByCourseId.get(course.id);
 
     return {
       id: course.id,
@@ -141,7 +225,7 @@ export async function GET() {
       course_code: course.course_code ?? "",
       course_title: course.course_title ?? "",
       objective: course.objective ?? "",
-      short_description : course.short_description ?? "",
+      short_description: course.short_description ?? "",
       college_name: course.college_name ?? "",
       faculty_name: course.offering?.faculty_name ?? "",
       department_name: course.offering?.department_name ?? "",
@@ -149,36 +233,46 @@ export async function GET() {
       price: course.price,
       currency: course.currency ?? "NGN",
       access_status: isLocked ? "locked" : "unlocked",
+      payment_status: isLocked
+        ? paymentRequest?.status ?? null
+        : null,
+      payment_request_id: isLocked
+        ? paymentRequest?.id ?? null
+        : null,
     };
   });
 
   let multiplayerSession = null;
 
   if (courseIds.length > 0) {
-    const { data: multiplayerRows, error: multiplayerError } = await supabase
-      .from("cbt_sessions")
-      .select(
-        ` id,
-        course_id,
-        title,
-        starts_at,
-        created_by,
-        current_participant:cbt_session_participants(
-          status
+    const { data: multiplayerRows, error: multiplayerError } =
+      await supabase
+        .from("cbt_sessions")
+        .select(
+          `
+          id,
+          course_id,
+          title,
+          starts_at,
+          created_by,
+          current_participant:cbt_session_participants(
+            status
+          )
+        `,
         )
-      `,
-      )
-      .eq("kind", "multiplayer")
-      .in("course_id", courseIds)
-      .eq("cbt_session_participants.user_id", user.id)
-      .eq("cbt_session_participants.status", "invited")
-      .limit(1)
-      .returns<MultiplayerRow[]>();
+        .eq("kind", "multiplayer")
+        .in("course_id", courseIds)
+        .eq("cbt_session_participants.user_id", user.id)
+        .eq("cbt_session_participants.status", "invited")
+        .limit(1)
+        .returns<MultiplayerRow[]>();
 
     if (!multiplayerError && multiplayerRows?.[0]) {
       const multiplayerRow = multiplayerRows[0];
 
-      const participant = Array.isArray(multiplayerRow.current_participant)
+      const participant = Array.isArray(
+        multiplayerRow.current_participant,
+      )
         ? multiplayerRow.current_participant[0]
         : multiplayerRow.current_participant;
 
@@ -192,7 +286,8 @@ export async function GET() {
         multiplayerSession = {
           id: multiplayerRow.id,
           course_id: multiplayerRow.course_id,
-          title: multiplayerRow.title ?? "Multiplayer CBT session",
+          title:
+            multiplayerRow.title ?? "Multiplayer CBT session",
           host_name: host?.full_name ?? "Your host",
           starts_at: multiplayerRow.starts_at,
           invitation_status: "invited",
@@ -210,7 +305,8 @@ export async function GET() {
         "Student",
       current_college: verification.current_college ?? null,
       current_faculty: verification.current_faculty ?? null,
-      current_department: verification.current_department ?? null,
+      current_department:
+        verification.current_department ?? null,
       current_level: verification.current_level ?? null,
     },
     courses: normalizedCourses,

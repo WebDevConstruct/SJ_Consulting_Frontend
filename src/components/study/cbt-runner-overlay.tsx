@@ -114,7 +114,7 @@ const { notification, showResultForSession} = useSessionResultPopUp(supabase, us
   const [result, setResult] = useState<SubmitCbtSessionResult | null>(
     null,
   );
-  const [participantInfo, setParticipantInfo] = useState<SubmitSessionOpponent | null>(null);
+  const [participantInfo, setParticipantInfo] = useState<SubmitSessionOpponent | null>({} as SubmitSessionOpponent);
   const [waitingRoom, setWaitingRoom] = useState(false);
   const current = questions[index];
   const currentOptions = useMemo(
@@ -127,69 +127,85 @@ const { notification, showResultForSession} = useSessionResultPopUp(supabase, us
   ).length;
 
 
-  const participantsInSession = async()=> {
-     if(!session?.session_id) return;
-     const {data : participants, error} = 
-     await supabase.from("cbt_session_participants")
-     .select("id, status")
-     .eq("session_id", session?.session_id)
+//   const participantsInSession = async()=> {
+//      if(!session?.session_id) return;
+//      const {data : participants, error} = 
+//      await supabase.from("cbt_session_participants")
+//      .select("id, status")
+//      .eq("session_id", session?.session_id)
      
-   setTotalParticipants(participants?.length || 0)
- const participantsCount = participants?.filter((participant)=> (
-  participant?.status === "completed"
- ))
- setParticipantsSessionCompleted(participantsCount?.length || 0)
-  }
+//    setTotalParticipants(participants?.length || 0)
+//  const participantsCount = participants?.filter((participant)=> (
+//   participant?.status === "completed"
+//  ))
+//  setParticipantsSessionCompleted(participantsCount?.length || 0)
+//   }
 
 
-  const SessionCheck = async()=> {
-       const {data  , error} = await supabase.from("cbt_sessions")
-     .select("status")
-     .eq("id", session?.session_id)
-      .maybeSingle();
-      if(error){
-        showToast({
-          kind : "error",
-          title : "Session Retrieval Error",
-          message : "The System Failed to Retrieve the Session Status"
-        })
-      }
-if(data?.status === "completed"){
-  setSessionStatus("completed");
-  setWaitingRoom(false);
-   await showResultForSession(session?.session_id || "");
-}
+//   const SessionCheck = async()=> {
+//        const {data  , error} = await supabase.from("cbt_sessions")
+//      .select("status")
+//      .eq("id", session?.session_id)
+//       .maybeSingle();
+//       if(error){
+//         showToast({
+//           kind : "error",
+//           title : "Session Retrieval Error",
+//           message : "The System Failed to Retrieve the Session Status"
+//         })
+//       }
+// if(data?.status === "completed"){
+//   setSessionStatus("completed");
+//   setWaitingRoom(false);
+//    await showResultForSession(session?.session_id || "");
+// }
 
-  }
+//   }
   
+
+  //let participantInformation : SubmitSessionOpponent | null = null;
 
 
   const [opponentStatus, setOpponentStatus] =
           useState<OpponentStatus | null>(null);
       
-        useEffect(() => {
-          console.log(session?.session_id, participantInfo?.user_id);
-          if (!session?.session_id || !participantInfo?.user_id) return;
-      
-          let isMounted = true;
-      
-          async function loadOpponentStatus() {
+
+            async function loadOpponentStatus() {
+             // console.log(participantInfo?.user_id, "Opponent User ID")
             const { data, error } = await supabase
               .from("cbt_session_participants")
-              .select("status")
+              .select("status, opponent")
               .eq("session_id", session?.session_id)
               .eq("user_id", participantInfo?.user_id)
               .maybeSingle();
       
-            if (!isMounted) return;
+          //  if (!isMounted) return;
       
-            if (!error && data?.status) {
+            if (!error && data?.status && data?.opponent) {
               setOpponentStatus(data.status as OpponentStatus);
+              setParticipantInfo(data?.opponent as SubmitSessionOpponent)
+              if(data?.status === "completed" && participantInfo?.status !== "completed"){
+                 await showResultForSession(session?.session_id || "")
+       setWaitingRoom(false);
             }
           }
+          }
+
+
+        useEffect(() => {
+          console.log(session?.session_id, participantInfo?.user_id);
+          if (!session?.session_id || !participantInfo?.user_id) return;
       
+      //     let isMounted = true;
+      
+        
+      // if(!isMounted) return;
+      const runAction = ()=> {
+      //  if(isMounted) return;
           void loadOpponentStatus();
-         if(!session?.session_id || !participantInfo?.user_id) return;
+      }
+      runAction()
+        // if(!session?.session_id || !participantInfo?.user_id) return;
           const channel = supabase
             .channel(`opponent-submission:${session?.session_id}:${participantInfo?.user_id}`)
             .on(
@@ -211,10 +227,10 @@ if(data?.status === "completed"){
             .subscribe();
       
           return () => {
-            isMounted = false;
+            //     let isMounted = false;
             supabase.removeChannel(channel);
           };
-        }, [session?.session_id, participantInfo?.user_id, supabase, submitting]);
+        }, [session?.session_id, participantInfo, supabase, submitting]);
       
         const opponentSubmitted = opponentStatus === "completed";
       
@@ -242,7 +258,7 @@ if(data?.status === "completed"){
         session.session_id,
         answers,
       );
-      if(submitted?.score_percent){
+
     
 //participantsInSession()
       if(!submitted?.session_id){
@@ -253,9 +269,9 @@ if(data?.status === "completed"){
 })
 
       }
-     console.log("Checking the Opponents Value", submitted?.opponent)
+    // console.log("Checking the Opponents Value", submitted?.opponent)
       if(submitted?.opponent?.status=== "completed" ){
-        setParticipantInfo(submitted?.opponent)
+     // setParticipantInfo(submitted?.opponent)
      setSessionStatus("completed")
       await showResultForSession(session?.session_id)
        setWaitingRoom(false);
@@ -264,9 +280,11 @@ if(data?.status === "completed"){
         || submitted?.opponent?.status === "invited" 
         || submitted?.opponent?.status === "accepted" || submitted?.opponent
         ?.status === "disconnected"){
-          setParticipantInfo(submitted.opponent)
-   participantsInSession();
-   setWaitingRoom(true)
+            setParticipantInfo(submitted?.opponent)
+          console.log(submitted?.opponent, "It passes the opponent information")
+        //  setParticipantInfo(submitted.opponent)
+ //  participantsInSession();
+   setWaitingRoom(true);
       
       }
   
@@ -275,7 +293,7 @@ if(data?.status === "completed"){
           title : "Session Completed",
           message : "Your session has been completed successfully."
         })
-      }
+      
       
  
       setResult(submitted);
@@ -292,6 +310,9 @@ if(data?.status === "completed"){
     }
   };
 
+
+
+  //console.log(participantInfo?.user_id)
   useEffect(() => {
    // console.log("Running effect")
     if (!open || !session || session.mode !== "exam") {
@@ -301,6 +322,7 @@ if(data?.status === "completed"){
     const deadline = submitDeadline
       ? new Date(submitDeadline).getTime()
       : Date.now() + session.duration_seconds * 1000;
+
 
     const tick = () => {
       const remaining = Math.max(
@@ -320,13 +342,21 @@ if(data?.status === "completed"){
     tick();
 
     const interval = window.setInterval(tick, 1000);
-    const MidInterval = window.setInterval(()=> SessionCheck(), 60000)//Every 1 minute
+    const MidInterval = window.setInterval(()=> {
+     // SessionCheck();
+      /////console.log(participantInfo?.user_id)
+       if(participantInfo?.user_id ){
+      loadOpponentStatus()
+       }
+     
+      
+    }, 20000)//Every 20 seconda
     return () => {
       window.clearInterval(interval);
       window.clearInterval(MidInterval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, session, submitDeadline]);
+  }, [open, session, participantInfo, submitDeadline]);
 
   //Listening for Session Notifications
 
