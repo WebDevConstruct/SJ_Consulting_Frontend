@@ -9,6 +9,7 @@ import { PasswordField } from "@/components/forms/password-field";
 import {createClient} from "@/lib/supabase/client";
 import {useStatusToast} from "@components/ui/status-toast";
 import { useSearchParams } from "next/navigation";
+import type { FormEvent } from "react";
 export function SignInForm() {
   const params = useSearchParams();
   const EmailVerification = params?.get("isverified") === "true"

@@ -114,6 +114,7 @@ const StudyCoursePage = () => {
     //eslint-disable-next-line
   }, []);
   useEffect(() => {
+
     const loadCourse = async () => {
       setLoading(true);
 

@@ -10,7 +10,7 @@ import  SoloModeModal  from "@/components/study/solo-mode-modal";
 import { TimingHeadsUpModal } from "@/components/study/timing-heads-up-modal";
 import {InvitePeerOverlay}  from "@/components/study/invite-peer-overlay";
 import { CbtRunnerOverlay } from "@/components/study/cbt-runner-overlay";
-import { startCbtSession, type StartedSession, SubmissionResult, startPeerSession, getPeerSession } from "@/lib/study/cbt-api";
+import { startCbtSession, type SubmitCbtSessionResult, type StartedSession,  startPeerSession, getPeerSession } from "@/lib/study/cbt-api";
 import type { CbtMode, PeerSession, CbtTrack } from "@/lib/study/types";
 import { AccountCompletionRequired } from "@/components/SettingUpModals/AccounCompletionRequired";
 import { createClient } from "@/lib/supabase/client";
@@ -51,7 +51,7 @@ const [activeSession, setActiveSession] = useState<StartedSession | null >(null)
   const [runnerOpen, setRunnerOpen] = useState(false);
 
   const [runnerMode, setRunnerMode] = useState<CbtMode>("practice");
-  const [lastResult, setLastResult] = useState<SubmissionResult>({} as SubmissionResult);
+  const [lastResult, setLastResult] = useState<SubmitCbtSessionResult>({} as SubmitCbtSessionResult);
   const {acceptedSession, setAcceptedSession, recipientSession, setRecipientSession, setNotification} = useGlobalContext()
 const [userIdTransfer, setUserIdTransfer] = useState<string>("");
 const [userInfoAuth, setUserInfoAuth] = useState<usermetadata>({} as usermetadata);
@@ -373,7 +373,7 @@ alert("RUNNING");
   
 };
 }
-  const handleRunnerFinish = (result: SubmissionResult) => {
+  const handleRunnerFinish = (result: SubmitCbtSessionResult) => {
     setLastResult(result);
     setRunnerOpen(false);
     setAcceptedSession( { 
