@@ -58,7 +58,7 @@ try {
       email :String(email ?? "").trim(),
      password : String(password ?? "")?.trim() || "",
       options : {
-      emailRedirectTo : `https://sjeduhub.com/auth/confirm`,
+      emailRedirectTo : `${window.location.origin}/auth/confirm`,
         data : {
             phone: String(phone ?? "").trim(),
       username: String(username ?? "").trim(),
@@ -94,9 +94,9 @@ try {
       kind : "success",
       title : "Account Created",
       message : "Your account has been created successfully. Please check your email for verification.",
-      statusCode : 200
+     
     })
-      router.push(profile === "aspirant" ? "/dashboard/aspirant" : "/dashboard/undergraduate");
+      router.push("/signin");
       router.refresh();
   }catch (signupError) {
     console.log(error);

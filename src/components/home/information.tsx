@@ -74,10 +74,7 @@ const filterByCatMentor : AnnouncementRecord[] =  announcements?.filter((item)=>
 const filterByCatJamb : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "jamb") || []
 const filterByCatAccomodation : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "accommodation") || []
 const filterByCatUnderGraduate : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "unilag") || []
-console.log("filterByCatMentor", filterByCatMentor)
-console.log("filterByCatJamb", filterByCatJamb)
-console.log("filterByCatAccomodation", filterByCatAccomodation)
-console.log("filterByCatUnderGraduate", filterByCatUnderGraduate)
+
 
 const informationData: InformationCategory[] = [
   {
@@ -104,7 +101,7 @@ const informationData: InformationCategory[] = [
   },
   {
     type: "accommodation",
-    title: "Undergraduate Information & Correspondents",
+    title: "Accommodations",
     description: "Campus notices, course registration deadlines, dockets, GST login access, continuous assessment updates, and campus accommodation alerts.",
     link : "/accommodation",
     data:  filterByCatAccomodation

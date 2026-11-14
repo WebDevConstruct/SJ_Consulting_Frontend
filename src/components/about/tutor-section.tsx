@@ -1,5 +1,5 @@
 import { tutor } from "@/lib/mock-data";
-
+import Image from "next/image";
 function TutorMonogram() {
   const initials = tutor.name
     .split(" ")
@@ -35,8 +35,10 @@ export function TutorSection() {
   return (
     <section className="border-t border-paper-line bg-paper-soft dark:border-ink-line dark:bg-ink-soft">
       <div className="container-content flex flex-col items-center py-24 text-center md:py-28">
-        <div className="h-32 w-32">
-          <TutorMonogram />
+        <div className="h-[500px] w-full px-2 lg:w-1/2 flex-shrink-0">
+          <Image src="/images/SJOwner.jpeg" 
+          className="h-full w-full " alt="Tutor" width={128} height={128} />
+          {/* <TutorMonogram /> */}
         </div>
 
         <h2 className="mt-7 font-display text-[26px] leading-snug sm:text-[28px]">

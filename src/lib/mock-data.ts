@@ -134,9 +134,9 @@ export const cac = {
 };
 
 export const tutor = {
-  name: "Snazy Joel",
+  name: "JOEL ONYIKE",
   title: "Founder & Lead Consultant, SJ Consult",
-  bio: "Eight years guiding JAMB aspirants and UNILAG undergraduates through admissions, GST modules and course registration — after living through the same confusion himself as a first-generation university applicant.",
+  bio: "Three years guiding JAMB aspirants and UNILAG undergraduates through admissions, GST modules and course registration — after living through the same confusion himself as a first-generation university applicant.",
 };
 
 export const departments = [
