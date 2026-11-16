@@ -20,8 +20,8 @@ export type StudentCourse = {
   course_title: string;
   objective: string | null;
   level: string;
-  price: number | null;
-  currency: string;
+  price_amount: number | null;
+  price_currency: string;
   access_status: "locked" | "unlocked";
   payment_status?: CoursePaymentStatus | null;
   payment_request_id?: string | null;

@@ -16,8 +16,8 @@ type CourseRow = {
   objective: string | null;
   short_description?: string | null;
   college_name: string | null;
-  price: number | null;
-  currency: string | null;
+  price_amount: number | null;
+  price_currency: string | null;
   offering: {
     id: string;
     faculty_name: string | null;
@@ -111,8 +111,8 @@ export async function GET() {
       objective,
       short_description,
       college_name,
-      price,
-      currency,
+      price_amount,
+      price_currency,
       offering:course_offerings(
         id,
         faculty_name,
@@ -230,8 +230,8 @@ export async function GET() {
       faculty_name: course.offering?.faculty_name ?? "",
       department_name: course.offering?.department_name ?? "",
       level: course.offering?.level ?? "",
-      price: course.price,
-      currency: course.currency ?? "NGN",
+      price_amount: course.price_amount,
+      price_currency: course.price_currency ?? "NGN",
       access_status: isLocked ? "locked" : "unlocked",
       payment_status: isLocked
         ? paymentRequest?.status ?? null

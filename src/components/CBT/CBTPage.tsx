@@ -193,8 +193,8 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
                     </div>
 
                     <p className="shrink-0 text-sm font-bold text-ink dark:text-gold-300">
-                      {course.price
-                        ? `${course.currency} ${course.price}`
+                      {course.price_amount
+                        ? `${course.price_currency} ${course.price_amount}`
                         : "Free"}
                     </p>
                   </div>
@@ -219,8 +219,8 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
                       className="w-full"
                       text={
                         isLocked
-                          ? course.price
-                            ? `Buy now — ${course.currency} ${course.price}`
+                          ? course.price_amount
+                            ? `Buy now — ${course.price_currency} ${course.price_amount}`
                             : "Buy now"
                           : "Study"
                       }

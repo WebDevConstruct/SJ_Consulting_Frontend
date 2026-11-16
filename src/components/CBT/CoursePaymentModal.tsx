@@ -290,11 +290,11 @@ const { paymentRequest, setPaymentRequest} = useGlobalContext();
         <div className="flex items-start justify-between gap-4 border-b border-paper-line p-5 dark:border-ink-line">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-200">
-              {course.course_code}
+              {course?.course_code || "Unresolved course"}
             </p>
 
             <h2 className="mt-1 font-display text-xl font-bold">
-              {copy.title}
+              {copy?.title || "Course Payment"}
             </h2>
           </div>
 
@@ -310,7 +310,7 @@ const { paymentRequest, setPaymentRequest} = useGlobalContext();
 
         <div className="p-5">
           <p className="text-sm leading-6 text-ink/70 dark:text-paper/70">
-            {copy.description}
+            {copy?.description || "Description"}
           </p>
 
           {checking ? (
@@ -330,7 +330,7 @@ const { paymentRequest, setPaymentRequest} = useGlobalContext();
                       <p className="mt-1 text-lg font-bold">
                         {paymentRequest
                           ? `${paymentRequest.currency} ${paymentRequest.amount}`
-                          : `${course.currency} ${course.price}`}
+                          : `${course.price_currency} ${course.price_amount}`}
                       </p>
                     </div>
 
