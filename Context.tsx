@@ -5,13 +5,37 @@ import { SessionNotification } from "@/components/SessionResultPopUp";
 import {usermetadata} from "@/types/UserTypes";
 import {createClient} from "@lib/supabase/client";
 import { useRouter} from "next/navigation";
-import { type CoursePaymentRequest} from "../sj-consult/src/components/CBT/cbt-types";
+
 export interface signUpStateType{
          codeSent : boolean,
         otpSent : boolean,
         otpVerified: boolean,
         emailVerified : boolean
 }
+
+export type CoursePaymentStatus =
+  | "pending_payment"
+  | "payment_claimed"
+  | "receipt_sent"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "expired";
+type CoursePaymentRequest = {
+  id: string;
+  course_id: string;
+  status: CoursePaymentStatus;
+  amount: number;
+  currency: string;
+  claimed_at: string | null;
+  receipt_sent_at: string | null;
+  approved_at: string | null;
+  rejected_at: string | null;
+  expires_at: string | null;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
  
 type CourseResponse = {
   course?: {
