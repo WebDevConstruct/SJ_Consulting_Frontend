@@ -20,7 +20,7 @@ type CoursePaymentModalProps = {
   onAccessGranted: (course: StudentCourse) => void;
 };
 
-const WHATSAPP_NUMBER = "2348012345678";
+const WHATSAPP_NUMBER = "2349131675598";
 
 const stateCopy: Record<
   CoursePaymentStatus,
@@ -269,7 +269,7 @@ export function CoursePaymentModal({
   };
 
   const copyAccountNumber = async () => {
-    const accountNumber = "0123456789";
+    const accountNumber = "3004592209";
 
     try {
       await navigator.clipboard.writeText(accountNumber);
@@ -343,12 +343,12 @@ export function CoursePaymentModal({
                   </div>
 
                   <div className="mt-4 space-y-1 text-sm">
-                    <p className="font-semibold">SJ Consults</p>
+                    <p className="font-semibold">SJ Consults LTD</p>
                     <p className="text-ink/70 dark:text-paper/70">
-                      Account number: 0123456789
+                      Account number: 3004592209
                     </p>
                     <p className="text-ink/70 dark:text-paper/70">
-                      Bank: Your bank name
+                      Bank: KUDA MFB
                     </p>
                   </div>
                 </div>

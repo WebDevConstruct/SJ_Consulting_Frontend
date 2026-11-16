@@ -91,6 +91,8 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
   if (course.access_status === "unlocked") {
     onStudyCourse(course);
     return;
+  }else{
+    onBuyCourse(course);
   }
 
   setPaymentCourse(course);
@@ -213,7 +215,7 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
                   </div>
 
                   <div className="relative mt-7">
-                    <Button
+                    <Button 
                       className="w-full"
                       text={
                         isLocked

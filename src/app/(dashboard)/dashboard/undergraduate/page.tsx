@@ -101,7 +101,7 @@ export default function UndergraduateDashboardPage() {
      
         onClickOne={()=> {
           setAccountCompleteSuccess(false)
-          route?.replace("/dashboard/undergraduate/cbt")
+          route?.replace("/dashboard/undergraduate/study")
           }}
          onClickTwo={()=> setAccountCompleteSuccess(false)}
 
@@ -207,7 +207,7 @@ export default function UndergraduateDashboardPage() {
             Year 1 and Year 2 GST modules, once payment access is wired in.
           </p>
           <Link
-            href="/dashboard/undergraduate/gst"
+            href="#"
             className="focus-gold mt-4 inline-flex w-fit rounded-sm border border-gold-400 bg-gold-metal-soft px-5 py-2.5 text-[13.5px] font-semibold text-ink shadow-gold transition-transform hover:scale-[1.02]"
           >
             View GST

@@ -148,7 +148,8 @@ export function Information() {
           transition={{ duration: 0.5 }}
           className="max-w-xl"
         >
-          <h1 className="text-center font-serif text-3xl leading-tight text-ink sm:text-4xl md:text-[50px] dark:text-paper">
+          <h1 className="text-center text-[20px] leading-[25px] font-serif
+            text-ink sm:text-4xl md:text-[50px] dark:text-paper lg:leading-[60px]">
             Information and Scholarship Opportunities,
             All in one place.
           </h1>

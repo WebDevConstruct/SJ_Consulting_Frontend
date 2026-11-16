@@ -8,13 +8,7 @@ import { getAnnouncements } from "@lib/api";
 import type { AnnouncementRecord } from "@/types/announcementTypes";
 import type { InformationCategory } from "@/components/assets/information";
 
-type AccommodationPageProps = {
-  className?: string;
-};
-
-export default function Accomodation({
-  className = "",
-}: AccommodationPageProps) {
+export default function ExamPage() {
   const [announcements, setAnnouncements] = useState<
     AnnouncementRecord[] | null
   >(null);
@@ -37,7 +31,7 @@ export default function Accomodation({
           setError(
             fetchError instanceof Error
               ? fetchError.message
-              : "Unable to load accommodation updates.",
+              : "Unable to load JAMB updates.",
           );
         }
       } finally {
@@ -52,7 +46,7 @@ export default function Accomodation({
     return () => controller.abort();
   }, []);
 
-  const filterByCatAccomodation: AnnouncementRecord[] =
+  const filterByCatAccomm: AnnouncementRecord[] =
     announcements?.filter(
       (item) => item.category === "accommodation",
     ) ?? [];
@@ -60,26 +54,24 @@ export default function Accomodation({
   const informationData: InformationCategory[] = [
     {
       type: "accommodation",
-      title: "Accommodation",
+      title: "Accommodation Updates",
       description:
-        "Accommodation updates, hostel information, residence guidelines, and official announcements.",
+        "Updates on accommodation options, policies, and available resources for students.",
       link: "/accommodation",
-      data: filterByCatAccomodation,
+      data: filterByCatAccomm,
     },
   ];
 
   return (
-    <div
-      className={`w-full bg-paper-line dark:bg-ink ${className}`}
-    >
+    <div className="flex h-auto w-full flex-col bg-paper-line dark:bg-ink">
       {informationData.map((item, index) =>
         item.type === "accommodation" ? (
           <section
             key={index}
-            className="w-full rounded-2xl border border-paper-line bg-paper px-4 py-10 sm:px-6 md:px-10 md:py-14 dark:border-ink-line dark:bg-ink"
+            className="item-card flex w-full flex-shrink-0 basis-full flex-col gap-8 rounded-2xl border border-paper-line bg-paper px-4 py-10 dark:border-ink-line dark:bg-ink sm:px-6 md:px-10 md:py-14"
           >
             <header className="mx-auto max-w-3xl text-center">
-              <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl dark:text-paper">
+              <h2 className="font-serif text-2xl font-bold leading-tight text-ink sm:text-3xl dark:text-paper">
                 {item.title}
               </h2>
 
@@ -91,31 +83,31 @@ export default function Accomodation({
             {error && (
               <div
                 role="alert"
-                className="mx-auto mt-8 max-w-2xl rounded-2xl border border-paper-line bg-paper-soft p-5 text-sm text-ink/70 dark:border-ink-line dark:bg-ink-soft dark:text-paper/70"
+                className="mx-auto max-w-2xl rounded-2xl border border-paper-line bg-paper-soft p-5 text-sm text-ink/70 dark:border-ink-line dark:bg-ink-soft dark:text-paper/70"
               >
                 {error}
               </div>
             )}
 
             {loading ? (
-              <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {[0, 1, 2, 3].map((placeholder) => (
                   <div
                     key={placeholder}
-                    className="h-72 animate-pulse rounded-2xl border border-paper-line bg-paper-soft dark:border-ink-line dark:bg-ink-soft"
+                    className="h-80 animate-pulse rounded-2xl border border-paper-line bg-paper-soft dark:border-ink-line dark:bg-ink-soft"
                   />
                 ))}
               </div>
-            ) : filterByCatAccomodation.length > 0 ? (
-              <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {filterByCatAccomodation
+            ) : filterByCatAccomm.length > 0 ? (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {filterByCatAccomm
                   .slice(0, 4)
                   .map((news) => (
                     <article
                       key={news.id}
-                      className="flex h-full flex-col overflow-hidden rounded-2xl border border-paper-line bg-paper-soft shadow-sm transition hover:shadow-md dark:border-ink-line dark:bg-ink-soft"
+                      className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-paper-line bg-paper-soft shadow-sm transition hover:shadow-md dark:border-ink-line dark:bg-ink-soft"
                     >
-                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-paper-line dark:bg-ink">
+                      <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-paper-line dark:bg-ink">
                         {news.image_url ? (
                           <Image
                             src={news.image_url}
@@ -136,9 +128,9 @@ export default function Accomodation({
                         )}
                       </div>
 
-                      <div className="flex min-h-0 flex-1 flex-col p-5">
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-200">
+                      <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-5">
+                        <div className="min-h-0 flex-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-gold-700 dark:text-gold-200">
                             {news.created_at
                               ? new Date(
                                   news.created_at,
@@ -153,21 +145,21 @@ export default function Accomodation({
                               : "Recent update"}
                           </p>
 
-                          <h3 className="mt-2 line-clamp-2 font-display text-base font-bold leading-snug text-ink dark:text-paper">
+                          <h3 className="mt-2 line-clamp-2 font-serif text-base font-bold leading-snug text-ink dark:text-paper">
                             {news.title}
                           </h3>
 
-                          <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink/65 dark:text-paper/65">
+                          <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/65 dark:text-paper/65">
                             {news.summary ??
                               news.content ??
                               "Read the full announcement for details."}
                           </p>
                         </div>
 
-                        <div className="mt-5 flex items-center justify-between gap-3 border-t border-paper-line pt-4 dark:border-ink-line">
+                        <div className="mt-4 flex shrink-0 items-center justify-between gap-3 border-t border-paper-line pt-3 dark:border-ink-line">
                           <Link
-                            href={`/jamb/${news.slug}`}
-                            className="text-xs font-semibold text-gold-700 transition hover:text-gold-600 dark:text-gold-200 dark:hover:text-gold-100"
+                            href={`/accommodation/${news.slug}`}
+                            className="text-[11px] font-semibold text-gold-700 transition hover:text-gold-600 dark:text-gold-200 dark:hover:text-gold-100"
                           >
                             View details
                           </Link>
@@ -175,9 +167,9 @@ export default function Accomodation({
                           <button
                             type="button"
                             onClick={() => {
-                              window.location.href = `/jamb/${news.slug}`;
+                              window.location.href = `/accommodation/${news.slug}`;
                             }}
-                            className="rounded-full border border-gold-400 bg-gold-metal-soft px-4 py-2 text-xs font-bold text-ink transition hover:bg-gold-400/20 dark:border-gold-400/50 dark:text-paper"
+                            className="rounded-full border border-gold-400 bg-gold-metal-soft px-3 py-1.5 text-[11px] font-bold text-ink transition hover:bg-gold-400/20 dark:border-gold-400/50 dark:text-paper"
                           >
                             Read more
                           </button>
@@ -187,130 +179,31 @@ export default function Accomodation({
                   ))}
               </div>
             ) : (
-              <div className="mt-10 rounded-2xl border border-paper-line bg-paper-soft p-10 text-center dark:border-ink-line dark:bg-ink-soft">
-                <h3 className="font-display text-xl font-bold text-ink dark:text-paper">
+              <div className="rounded-2xl border border-dashed border-paper-line bg-paper-soft p-10 text-center dark:border-ink-line dark:bg-ink-soft">
+                <h3 className="font-serif text-xl font-bold text-ink dark:text-paper">
                   No accommodation updates yet
                 </h3>
 
                 <p className="mt-3 text-sm text-ink/65 dark:text-paper/65">
-                  New accommodation announcements will appear here
-                  when they are published.
+                  New examination guidelines and announcements
+                  will appear here when published.
                 </p>
               </div>
             )}
+
+            <footer className="flex items-end justify-between gap-4">
+              <Link
+                href="/jamb"
+                className="font-serif text-sm font-semibold text-gold-700 transition hover:text-gold-600 dark:text-gold-200 dark:hover:text-gold-100"
+              >
+                See all JAMB updates
+              </Link>
+
+              <div className="h-2 w-24 rounded-full bg-gold-metal-soft" />
+            </footer>
           </section>
         ) : null,
       )}
     </div>
   );
 }
-
-// "use client"
-// import {Metadata} from "next";
-// import {useState, useEffect} from "react";
-// import {getAnnouncements} from "@lib/api";
-// import Image from "next/image";
-// import Link from "next/link";
-// import type { AnnouncementRecord } from "@/types/announcementTypes";
-// import type {InformationCategory} from "@/components/assets/information";
-
-
-// export default function Accomodation() {
-//   const [announcements, setAnnouncements] = useState<AnnouncementRecord[] | null>(null);
-
-//   useEffect(()=> {
-//     async function fetchAnnouncements(){
-//       const data = await getAnnouncements()
-//       setAnnouncements(data)
-//       console.log(data);
-//     }
-//     fetchAnnouncements()
-//   },[])
-
-//   const filterByCatAccomodation : AnnouncementRecord[] =  announcements?.filter((item)=> item.category === "accommodation") || []
-
-
-//   console.log("filterByCatAccomodation", filterByCatAccomodation)
- 
-  
-//   const informationData: InformationCategory[] = [
-//     {
-//       type: "accommodation",
-//       title: "Accommodation",
-//       description: "Examination updates, guidelines, syllabus changes, and official gazette bulletins directly from JAMB and national examination bodies.",
-  
-//       link : "/accommodation",
-//     data: filterByCatAccomodation
-//     },
-
-//   ];
-//   return (
-// <div className="bg-paper-line w-full flex flex-col h-auto">
-//     {informationData?.map((item, index)=> (
-//         item?.type === "accommodation" && (
-//    <div key={index}
-              
-//                 className={`w-full  rounded-md border-1 border-gray-100 
-//                     overflow-y-hidden item-card px-10 
-//                    ${index == 0 || index === 2 ? "bg-paper-soft" : index === 1 || index === 3 ? "bg-paper-line" : ""}
-//                       flex-shrink-0 basis-full bg-paper p-8
-//                  dark:bg-ink h-full flex flex-col gap-10 py-15 `}
-//               >
-//                 <h2 className="text-[30px] leading-tight text-current/80 text-center font-bold">
-
-//                  {item?.title}
-//                  </h2>
-//               <div className="flex flex-col lg:flex-row gap-5 lg:h-[450px] w-full">
-//                                  {item?.data?.length > 0 ? (
-//                                    item?.data?.map((news, i)=> (
-//                                      i < 4  && (
-//                  <div  className={`   ${i !== 0 ? "hidden lg:block" : ""} border-[3px] shadow-md 
-//                      border-gray-100 rounded-xl  lg:w-1/4 `} 
-//                                  key={i}>
-             
-//                               <div className=" w-full h-1/3  ">
-//                                 {news?.image_url?.length ? (
-//                               <Image width={400} height={400} className={"object-cover w-full h-full"} 
-//                               src={news.image_url} alt={item?.description}/>
-//                                 ) : (
-//                                  <div className="w-full h-full bg-gray-200"/>
-//                                 )}
-//                               </div>
-//                                 <div className="h-[67.333%] w-full  p-4 flex flex-col justify-between overflow-y-hidden">
-//                                  <div className="h-full">
-//                                  <h2 className="lg:text-[16px] lg:leading-[20px] text-[13px] leading-[18x] font-semibold text-current/80">
-//                {news?.title}
-//                                  </h2> 
-//                                <i className="text-sm text-current/70">
-//                                  {news?.summary ? `${news?.summary?.slice(0, 100)}...` : ""}
-//                                </i>
-//                                <p> 
-//                                  { `${news?.content?.slice(0, 100)}...` || ""}
-
-//                                </p>
-//                                </div>
-//                                <p className="text-[10px]  font-semibold">
-//                               {news?.created_at ? new Date(news?.created_at).toString()?.slice(4, news?.created_at?.length -16) : ""}
-//                                 </p>
-//                                  <Link href={`/jamb/${news?.slug}`} 
-//                                             className="text-sm text-color-gold-metal
-//                                              text-end">
-//                                             Read more
-//                                             </Link>
-//                                 </div>
-                          
-   
-//                                   </div>
-//                                     ) ))): (
-//                                      <div className="">
-//                                        </div>
-//                                     )}
-//                                     </div>
-
-               
-//               </div>
-//                     )
-// ))}
-//            </div>
-//   );
-// }

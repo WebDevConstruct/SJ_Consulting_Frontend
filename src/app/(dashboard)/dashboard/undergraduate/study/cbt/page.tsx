@@ -19,7 +19,7 @@ const UndergraduateCBTPage = () => {
 
   const handleBuyCourse = async (course: StudentCourse) => {
     try {
-      const response = await fetch(`/api/student/cbt/courses/${course.id}/checkout`, {
+      const response = await fetch(`/api/student/cbt/payment`, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -30,7 +30,7 @@ const UndergraduateCBTPage = () => {
         }),
       });
       if(response.ok && window !== undefined){
-            window.location.reload()
+           // window.location.reload()
  }
 
       //const result = await response.json();
@@ -42,14 +42,15 @@ const UndergraduateCBTPage = () => {
         message: `${course.course_code} purchase failed at this time..`,
       });
       }
-
+if(response.ok){
       showToast({
         kind: "success",
         title: "Payment successful",
         message: `${course.course_code} is now unlocked.`,
       });
+    }
 
-      router.refresh();
+      //router.refresh();
     } catch (error) {
       showToast({
         kind: "error",
@@ -57,7 +58,7 @@ const UndergraduateCBTPage = () => {
         message:
           error instanceof Error
             ? error.message
-            : "Unable to complete checkout.",
+            : "Unable to course payment.",
       });
     }
   };
