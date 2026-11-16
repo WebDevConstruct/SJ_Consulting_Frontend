@@ -5,6 +5,7 @@ import { SessionNotification } from "@/components/SessionResultPopUp";
 import {usermetadata} from "@/types/UserTypes";
 import {createClient} from "@lib/supabase/client";
 import { useRouter} from "next/navigation";
+import { type CoursePaymentRequest} from "../sj-consult/src/components/CBT/cbt-types";
 export interface signUpStateType{
          codeSent : boolean,
         otpSent : boolean,
@@ -53,7 +54,9 @@ type contextTypes = {
     userAuthInfo : usermetadata | null,
     setUserAuthInfo : React.Dispatch<React.SetStateAction<usermetadata | null>>,
     course : CourseResponse["course"] | null,
-    setCourse : React.Dispatch<React.SetStateAction<CourseResponse["course"] | null>>
+    setCourse : React.Dispatch<React.SetStateAction<CourseResponse["course"] | null>>,
+    paymentRequest : CoursePaymentRequest | null,
+    setPaymentRequest : React.Dispatch<React.SetStateAction<CoursePaymentRequest | null>>
 }
 const contextTree : React.Context<contextTypes> = createContext({} as contextTypes);
 export const useGlobalContext =()=> useContext(contextTree);
@@ -113,6 +116,7 @@ export const ContextProvider = ({children}: {children ?: React.ReactNode})=> {
     })
     const [notification, setNotification] = useState<SessionNotification | null>(null);
     const [courseId, setCourseId] = useState<string>("");
+    const [paymentRequest, setPaymentRequest] = useState<CoursePaymentRequest | null>(null);
     const router = useRouter();
     const UpdateUserInfo = async()=> {
     await supabase.auth.getUser()
@@ -147,7 +151,8 @@ useEffect(()=> {
         notification, setNotification,
         courseId, setCourseId,
         userAuthInfo, setUserAuthInfo,
-        activeSession, setActiveSession
+        activeSession, setActiveSession,
+         paymentRequest, setPaymentRequest
     }
     return (
         <contextTree.Provider value={hold}>

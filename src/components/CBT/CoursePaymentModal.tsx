@@ -6,7 +6,7 @@ import { Copy, CheckCircle2, Clock, MessageCircle, X } from "lucide-react";
 
 import { Button } from "@components/Button";
 import { useStatusToast } from "@/components/ui/status-toast";
-
+import { useGlobalContext } from "../../../Context"
 import type {
   CoursePaymentRequest,
   CoursePaymentStatus,
@@ -70,9 +70,8 @@ export function CoursePaymentModal({
   onAccessGranted,
 }: CoursePaymentModalProps) {
   const { showToast } = useStatusToast();
+const { paymentRequest, setPaymentRequest} = useGlobalContext();
 
-  const [paymentRequest, setPaymentRequest] =
-    useState<CoursePaymentRequest | null>(null);
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);

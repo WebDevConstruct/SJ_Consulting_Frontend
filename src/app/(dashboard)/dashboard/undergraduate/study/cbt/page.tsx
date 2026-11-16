@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import CBTPage from "@/components/CBT/CBTPage";
 import { useStatusToast } from "@/components/ui/status-toast";
 import { usePathname } from "next/navigation"
-import type { StudentCourse } from "@/components/CBT/cbt-types";
+import type { StudentCourse, CoursePaymentRequest} from "@/components/CBT/cbt-types";
+import { useGlobalContext } from "../../../../../../../Context";
 
 const UndergraduateCBTPage = () => {
   const pathname = usePathname();
   console.log(pathname);
   const router = useRouter();
+  const {setPaymentRequest} = useGlobalContext()
   const { showToast } = useStatusToast();
 
   const handleStudyCourse = (course: StudentCourse) => {
@@ -19,7 +21,7 @@ const UndergraduateCBTPage = () => {
 
   const handleBuyCourse = async (course: StudentCourse) => {
     try {
-      const response = await fetch(`/api/student/cbt/payment`, {
+      const response  = await fetch(`/api/student/cbt/payment`, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -30,7 +32,7 @@ const UndergraduateCBTPage = () => {
         }),
       });
       if(response.ok && window !== undefined){
-           // window.location.reload()
+      setPaymentRequest(response as unknown as CoursePaymentRequest)      // window.location.reload()
  }
 
       //const result = await response.json();
