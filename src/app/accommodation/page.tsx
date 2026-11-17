@@ -193,10 +193,10 @@ export default function ExamPage() {
 
             <footer className="flex items-end justify-between gap-4">
               <Link
-                href="/jamb"
+                href="/accommodation"
                 className="font-serif text-sm font-semibold text-gold-700 transition hover:text-gold-600 dark:text-gold-200 dark:hover:text-gold-100"
               >
-                See all JAMB updates
+                See all Accommodation updates
               </Link>
 
               <div className="h-2 w-24 rounded-full bg-gold-metal-soft" />

@@ -125,6 +125,7 @@ export type usermetadata= {
             phone: string,
             phone_verified: boolean,
             sub: string,
+            avatar_url ?: string;
             user_type: string,
             username: string
     
