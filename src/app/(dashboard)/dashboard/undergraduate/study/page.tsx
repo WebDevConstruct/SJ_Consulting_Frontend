@@ -67,11 +67,7 @@ const {userAuthInfo} = useGlobalContext()
           title="Study"
           description="Course Outlines and Study materials for each course are here"
           onClick={() => {
-            showToast({
-              kind : "info",
-              title : "Coming Soon",
-              message : "This feature is coming soon, please check back later"
-            })
+         router?.replace("/dashboard/undergraduate/study/materials")
           }}
         />
         <GlossyCard

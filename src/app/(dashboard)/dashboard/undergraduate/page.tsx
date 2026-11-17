@@ -64,8 +64,10 @@ export default function UndergraduateDashboardPage() {
          setFacultyValue("")
   }
   const examSchedule ={
+  
     exam_date : "2027-01-25T10:00:00Z",
-    exam_label : "First Semester Examination"
+    exam_label : "First Semester Examination",
+   
   }
   
   
@@ -155,6 +157,7 @@ export default function UndergraduateDashboardPage() {
         transition={{ duration: 0.4 }}
         className="border-b border-paper-line pb-8 dark:border-ink-line"
       >
+    
 {  checkAspirantMetaData && (
    <SettingUpAccount affirm_account_verification={true}/>
    )   }

@@ -14,7 +14,7 @@ import {
   Trophy,
   User,
 } from "lucide-react";
-
+import { useStatusToast} from "@components/ui/status-toast"
 import { createClient } from "@/lib/supabase/client";
 
 type Profile = {
@@ -44,15 +44,22 @@ export default function ProfilePage() {
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+
   const [performance, setPerformance] = useState<Performance>({
     total_points: 0,
     leaderboard_rank: null,
   });
-
+const { showToast } = useStatusToast()
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // This stores the Supabase Storage path, for example:
+  // "USER_ID/avatar-1730000000000.jpg"
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
+
+  // This stores the temporary signed URL used to display the private avatar.
+  const [signedAvatarUrl, setSignedAvatarUrl] = useState<string | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -70,7 +77,7 @@ export default function ProfilePage() {
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const loadProfile = useCallback(async () => {
-    let isActive = true;
+    const isActive = true;
 
     try {
       const {
@@ -85,9 +92,7 @@ export default function ProfilePage() {
 
       const { data: profileData, error: profileError } = await supabase
         .from("users")
-        .select(
-          "id, username, full_name, email, user_type, avatar_url"
-        )
+        .select("id, username, full_name, email, user_type, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -109,7 +114,7 @@ export default function ProfilePage() {
         setUsername(loadedProfile.username);
         setFullName(loadedProfile.full_name);
         setEmail(loadedProfile.email);
-        setAvatarUrl(loadedProfile.avatar_url);
+        setAvatarPath(loadedProfile.avatar_url);
       }
 
       // Load the signed-in student's leaderboard performance.
@@ -147,15 +152,46 @@ export default function ProfilePage() {
         setIsLoadingProfile(false);
       }
     }
-
-    return () => {
-      isActive = false;
-    };
   }, [router, supabase]);
 
+  // Create a temporary signed URL for the private avatar.
+  const loadSignedAvatarUrl = useCallback(async () => {
+    if (!avatarPath) {
+      setSignedAvatarUrl(null);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(avatarPath, 60 * 60); // Valid for 1 hour
+
+      if (error) {
+        console.error("Failed to create signed avatar URL:", error);
+        setSignedAvatarUrl(null);
+        return;
+      }
+
+      setSignedAvatarUrl(data.signedUrl);
+    } catch (error) {
+      console.error("Unexpected signed avatar URL error:", error);
+      setSignedAvatarUrl(null);
+    }
+  }, [avatarPath, supabase]);
+
   useEffect(() => {
+    const runAction =()=>{ 
     loadProfile();
+    }
+    runAction()
   }, [loadProfile]);
+
+  useEffect(() => {
+    const runAction = ()=> {
+    loadSignedAvatarUrl();
+    }
+    runAction()
+  }, [loadSignedAvatarUrl]);
 
   const handleAppearanceChange = (nextAppearance: Appearance) => {
     setAppearance(nextAppearance);
@@ -194,6 +230,36 @@ export default function ProfilePage() {
       if (error) {
         throw error;
       }
+      const { data : updatedData, error  : updatedError} = await supabase?.from("users")
+      .select("*").eq("id", profile?.id)?.maybeSingle()
+      if(updatedData && !updatedError){
+      const  {  error : updateError} = await supabase?.auth?.updateUser({
+        email : updatedData.email,
+        data : {
+    username : updatedData?.username,
+    full_name : updatedData?.full_name,
+    email : updatedData?.email
+        }
+        
+      })
+      if(updatedError){
+        showToast({
+          kind : "error",
+          title : "User Update Error",
+          message : updateError?.message || "Failed to update user in auth."
+        })
+      }
+    }
+
+      setProfile((previousProfile) =>
+        previousProfile
+          ? {
+              ...previousProfile,
+              username: username.trim(),
+              full_name: fullName.trim(),
+            }
+          : previousProfile
+      );
 
       setProfileStatus({
         kind: "success",
@@ -247,16 +313,11 @@ export default function ProfilePage() {
         throw uploadError;
       }
 
-      const { data } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      const publicUrl = data.publicUrl;
-
+      // Save the storage path, not a signed URL.
       const { error: updateError } = await supabase
         .from("users")
         .update({
-          avatar_url: publicUrl,
+          avatar_url: filePath,
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id);
@@ -265,7 +326,23 @@ export default function ProfilePage() {
         throw updateError;
       }
 
-      setAvatarUrl(publicUrl);
+      setAvatarPath(filePath);
+
+      const { data: signedUrlData, error: signedUrlError } =
+        await supabase.storage
+          .from("avatars")
+          .createSignedUrl(filePath, 60 * 60);
+
+      if (signedUrlError) {
+        console.error(
+          "Avatar uploaded, but the signed URL could not be created:",
+          signedUrlError
+        );
+        setSignedAvatarUrl(null);
+      } else {
+        setSignedAvatarUrl(signedUrlData.signedUrl);
+      }
+
       setProfileStatus({
         kind: "success",
         message: "Profile photo updated successfully.",
@@ -399,7 +476,7 @@ export default function ProfilePage() {
       <div className="mx-auto w-full max-w-4xl">
         <div className="h-2px w-12 bg-gold-metal" />
 
-        <h1 className="mt-6 font-display text-[28px] leading-tight sm:text-32px">
+        <h1 className="mt-6 font-display text-28px leading-tight sm:text-32px">
           Profile
         </h1>
 
@@ -412,10 +489,10 @@ export default function ProfilePage() {
           <section className="rounded-sm border border-paper-line bg-paper-soft p-6 dark:border-ink-line dark:bg-ink-surface lg:col-span-1">
             <div className="flex flex-col items-center text-center">
               <div className="relative">
-                {avatarUrl ? (
+                {signedAvatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={avatarUrl}
+                    src={signedAvatarUrl}
                     alt="Profile photo"
                     className="h-24 w-24 rounded-full border border-gold-40040 object-cover"
                   />
