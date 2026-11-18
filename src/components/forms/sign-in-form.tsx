@@ -18,7 +18,7 @@ export function SignInForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 const [email, setEmail] = useState("");
-const [password, setPassword] = useState("")
+const [password, setPassword] = useState<string>("")
 
 useEffect(()=> {
    async function  checkVerification(){
@@ -34,59 +34,102 @@ useEffect(()=> {
 
 
 },[])
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
- event.preventDefault()
-    setSubmitting(true);
-const supabase = createClient()
- 
-try{
- // console.log("Running")
-    const {data, error : responseError} = await supabase.auth.signInWithPassword({
-      email : String(email ?? "").trim(),
-      password: String(password ?? ""),
-      // Sent alongside every sign-in request per the brief, for device monitoring.
-     
+const [identifier, setIdentifier] = useState<string>("");
+//const [passowrd, setPassword] = useState<string>("")
+const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  setSubmitting(true);
+
+  const supabase = createClient();
+
+  const identifierCredential = String(identifier ?? "").trim();
+  const passwordCredential = String(password ?? "");
+
+  if (!identifierCredential || !passwordCredential) {
+    setSubmitting(false);
+    setError("Please enter your username or email and password.");
+
+    showToast({
+      kind: "error",
+      title: "Missing details",
+      message: "Please enter your username or email and password.",
     });
+
+    return;
+  }
+
+  try {
+    // Resolve either a username or an email into a Supabase Auth email.
+    const { data: emailData, error: emailError } = await supabase.rpc(
+      "get_auth_email_by_identifier",
+      {
+        p_identifier: identifier,
+      }
+    );
+
+    if (emailError) {
+      throw emailError;
+    }
+
+    const authEmail = emailData;
+
+    if (!authEmail) {
+      setSubmitting(false);
+      setError("Invalid username or password.");
+
+      showToast({
+        kind: "error",
+        title: "Error Signing In",
+        message: "Invalid username or password.",
+      });
+
+      return;
+    }
+
+    const { data, error: responseError } =
+      await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password,
+      });
 
     setSubmitting(false);
 
-if(responseError){
-   showToast({
-      kind : "error",
-      title : "Error Signing In",
-      message :  responseError.message || "An Unexpected error has occured.",
-     // statusCode : Number(responseError.code) 
-    })
-// console.log("SignInError", {
-//   name : error?.name,
-//   code : error?.code,
-//   message : error?.message
-// });
-}
-if(data.user){
-  console.log(data.user);
-   showToast({
-      kind : "success",
-      title : "Success",
-      message : "SignIn Successful",
-      statusCode : 200
-    })
-    router.push("/dashboard");
-}
-}catch(error){
-  if( error){
-  showToast({
-      kind : "error",
-      title : "Error Signing In",
-      message : "An Unexpected error has occured.",
-    
-    })
+    if (responseError) {
+      setError(responseError.message || "Error signing in.");
 
+      showToast({
+        kind: "error",
+        title: "Error Signing In",
+        message:
+          responseError.message || "An unexpected error has occurred.",
+      });
+
+      return;
+    }
+
+    if (data.user) {
+      showToast({
+        kind: "success",
+        title: "Success",
+        message: "Sign in successful.",
+      });
+
+      router.push("/dashboard");
+    }
+  } catch (error) {
+    setSubmitting(false);
+    setError("Error signing in.");
+
+    showToast({
+      kind: "error",
+      title: "Error Signing In",
+      message:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error has occurred.",
+    });
   }
-
-  setError("Error Signing in")
-}
-  };
+};
 
   return (
     <AuthLayout
@@ -113,12 +156,12 @@ if(data.user){
 
         <TextField
         value={email}
-        onChange={(e)=> setEmail(e.target.value)}
+        onChange={(e)=> setIdentifier(e.target.value)}
           label="Username or email"
           name="identifier"
           type="text"
           autoComplete="username"
-          placeholder="you@example.com"
+          placeholder="Enter your username or email"
           required
         />
 

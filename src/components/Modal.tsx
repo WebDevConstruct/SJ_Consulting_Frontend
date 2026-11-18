@@ -3,7 +3,7 @@ import React from 'react'
 export const Modal = ({children} : {children : React.ReactNode}) => {
   return (
     <div className="fixed lg:justify-center w-full h-screen flex  
-   backdrop-blur-lg z-40">
+   backdrop-blur-lg z-50">
      {children}
     </div>
 )
