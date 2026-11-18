@@ -155,7 +155,7 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         ) : null} */}
 
         <TextField
-        value={email}
+        value={identifier}
         onChange={(e)=> setIdentifier(e.target.value)}
           label="Username or email"
           name="identifier"
