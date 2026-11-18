@@ -220,8 +220,8 @@ const CBTPage = ({ onStudyCourse, onBuyCourse }: CBTPageProps) => {
                       text={
                         isLocked
                           ? course.price_amount
-                            ? `Buy now — ${course.price_currency} ${course.price_amount}`
-                            : "Buy now"
+                            ? `Get now — ${course.price_currency} ${course.price_amount}`
+                            : "Get now"
                           : "Study"
                       }
                       type="button"
